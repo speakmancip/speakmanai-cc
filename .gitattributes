@@ -1,0 +1,12 @@
+# Normalise line endings on commit
+* text=auto
+
+# Shell scripts must stay LF on all platforms
+*.sh text eol=lf
+
+# Windows scripts stay CRLF
+*.ps1 text eol=crlf
+
+# Python and Markdown — normalise
+*.py text eol=lf
+*.md text eol=lf

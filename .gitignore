@@ -1,0 +1,6 @@
+outputs/
+node_modules/
+_pdf_gen.js
+__pycache__/
+*.pyc
+.DS_Store
