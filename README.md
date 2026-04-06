@@ -1,6 +1,6 @@
 # speakmanai-cc
 
-Claude Code skills for the [SPEAKMAN.AI](https://speakman.ai) MCP server (cloud) or the [community self-hosted version](https://github.com/speakmanai/speakmanai_community). Each skill orchestrates a full SPEAKMAN.AI session, downloads the agent outputs, and generates a locally-authored deliverable using a configurable document template.
+Claude Code skills for the [SPEAKMAN.AI](https://speakman.ai) MCP server (cloud) or the [local self-hosted version](https://github.com/speakmancip/speakmanai-local). Each skill orchestrates a full SPEAKMAN.AI session, downloads the agent outputs, and generates a locally-authored deliverable using a configurable document template.
 
 ## Available Skills
 
@@ -27,14 +27,14 @@ Clone this repository, then run the install script from within it.
 
 **Windows:**
 ```powershell
-git clone https://github.com/speakmanai/speakmanai-cc
+git clone https://github.com/speakmancip/speakmanai-local.git
 cd speakmanai-cc
 .\install.ps1
 ```
 
 **macOS / Linux:**
 ```bash
-git clone https://github.com/speakmanai/speakmanai-cc
+git clone https://github.com/speakmancip/speakmanai-local.git
 cd speakmanai-cc
 chmod +x install.sh && ./install.sh
 ```
