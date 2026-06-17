@@ -53,6 +53,7 @@ Work through every check at or below the requested level. For each check record:
 - [ ] Unhandled errors are logged server-side before responding (console.error or equivalent)
 - [ ] String fields that accept user input have a maximum length enforced — unbounded strings are a FAIL
 - [ ] Numeric fields that accept user input have minimum and maximum bounds enforced
+- [ ] Every domain event published in the code has a wired subscriber, OR is documented as a forward extension point with no consumer — a published event whose consumer exists (an event-driven use case in the use case catalog) but has no subscriber is a FAIL, because the downstream effect silently never runs
 
 **Completeness**
 - [ ] A health check endpoint exists (`GET /health` or equivalent) with no auth requirement
@@ -70,6 +71,8 @@ Work through every check at or below the requested level. For each check record:
 - [ ] Integration / infrastructure tests use a real database or equivalent (no mocked persistence layer)
 - [ ] Interface / API tests cover every route: happy path, auth failure, and at least one validation error per endpoint
 - [ ] E2E tests exist for every primary use case
+- [ ] At least one E2E test exercises each primary user journey end-to-end through the API — the full ordered sequence of use cases for an actor, not just isolated single use cases
+- [ ] E2E / journey tests do not seed the database at seams between use cases — any value one use case produces and another consumes must be obtained from the producing API response; direct seeding at a seam can hide a response-contract gap and is a FAIL
 
 ---
 

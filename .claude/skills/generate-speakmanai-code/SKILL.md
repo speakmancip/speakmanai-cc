@@ -307,6 +307,22 @@ JWT authentication middleware:
 - Attaches `userId` to the request object on success
 - Returns 401 with a generic message on failure — no user enumeration, no token detail in the error
 
+**Domain event wiring (apply whenever the system publishes domain events):**
+- Read USE_CASES for any use case triggered by a domain event rather than a direct request —
+  typically an actor of "System", or a scenario worded "When <Event> is published / consumed".
+  These are event-driven use cases.
+- For every event a use case publishes, if USE_CASES defines another use case that consumes it,
+  wire a subscriber in the composition root (the same place repositories and use cases are
+  assembled) that invokes the consuming use case with the data the event carries.
+- A published event that has a catalog-defined consumer but no wired subscriber is an incomplete
+  implementation, not a deferral — the downstream effect will silently never happen. This is the
+  single most common reason a multi-step flow appears to "do nothing" after the first step.
+- The subscriber handler loads whatever additional state the consuming use case needs and must
+  not throw back into the publisher's request path — log and swallow, or use the platform's async
+  dispatch.
+- If an event has no consumer in USE_CASES, leave it published but unsubscribed (a forward
+  extension point) — do not invent a consumer.
+
 **BFF — Express proxy** (stateless, logic-free):
 - One route per API_SCHEMA path group
 - Forwards request method, path, headers (especially `Authorization`), and body to the backend verbatim
@@ -367,6 +383,25 @@ Each E2E test:
 - Executes the full Gherkin scenario as real HTTP calls through Supertest against the full backend stack
 - Asserts response status code, response body shape, and side effects (e.g. LogEntry written after every mutation)
 - Tests are named exactly after the Gherkin scenario name from USE_CASES
+
+**Chain dependent use cases through the API — no database seeding at journey seams:**
+- When one use case consumes a value another produces (an ID, token, or any field), the test
+  must obtain that value from the producing endpoint's real API response — not by inserting it
+  directly into the database.
+- Seeding via the database is allowed only for preconditions no in-scope use case can create
+  (e.g. reference data with no create endpoint). Anything a real client would obtain by calling
+  the API must be obtained by calling the API.
+- This is the only thing that surfaces response-contract gaps: if a producing endpoint omits a
+  field a downstream endpoint requires, an API-chained test fails where a seeded test would
+  falsely pass. If you hit such a gap, flag it `[DECISION REQUIRED]` — do not work around it by
+  seeding the missing value or substituting a different field.
+
+**Primary-journey tests (in addition to the per-use-case tests above):**
+- For every primary actor flow in USE_CASES (an ordered sequence of use cases a single actor
+  performs end to end), implement at least one journey test that runs the whole sequence through
+  the API as a real client would, asserting the final state and every side effect — including
+  records created asynchronously by event subscribers wired in Milestone 4.
+- Derive journeys only from USE_CASES — do not invent flows the catalog does not describe.
 
 Then run the full validation gate:
 
