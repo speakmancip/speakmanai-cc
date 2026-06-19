@@ -11,9 +11,9 @@ output — and save the resulting coding contracts to disk in the exact layout P
 (`generate-speakmanai-code`) reads. You drive the workflow's human-in-the-loop gates; you do
 not invent the contract content yourself.
 
-The output of this phase is the `raw/` contract set: coding brief, domain model, naming
-dictionary, use case catalog, API schema, database schema, test strategy, and (optionally)
-the field definitions catalog.
+The output of this phase is the `raw/` contract set: domain model, naming dictionary, use
+case catalog, API schema, database schema, test strategy, and (optionally) the field
+definitions catalog.
 
 ---
 
@@ -144,7 +144,6 @@ Branch A reads — do not use bash/Python to write:
 
 | Agent ID | Save as |
 |---|---|
-| `RE_CODING_BRIEF_WRITER_V1` | `coding_brief.txt` |
 | `RE_DOMAIN_MODELER_V1` | `domain_model.txt` |
 | `RE_USE_CASE_ANALYST_V1` | `use_case_catalog.txt` |
 | `RE_API_SCHEMA_DESIGNER_V1` | `api_schema.txt` |
@@ -156,7 +155,7 @@ Branch A reads — do not use bash/Python to write:
 **Prefer the reviewed/human-approved version** for naming and field definitions — the API and
 database designers depend on the reviewed outputs, so the saved file must match what they consumed.
 
-If any of the seven core contracts (all except `field_definitions.txt`, which is optional) is
+If any of the six core contracts (all except `field_definitions.txt`, which is optional) is
 absent from the manifest, stop and report which are missing — do not save a partial set as if complete.
 
 ---
@@ -169,7 +168,6 @@ Session ID   : {session_id}
 Credits used : {session_cost}
 Phase 1 src  : {Branch A dir | Branch B session | business text only}
 Outputs      : outputs/YYYY-MM-DD_{slug}/raw/
-  - coding_brief.txt
   - domain_model.txt
   - naming_dictionary.txt        ({reviewed | unreviewed})
   - use_case_catalog.txt

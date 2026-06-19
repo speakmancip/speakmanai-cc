@@ -23,11 +23,20 @@ Ask the user:
 
 > "What is the project/repo name? This becomes the directory name (e.g. `todo-list-app`)."
 
+> "What is the tech stack? Provide: language, runtime, framework, database, and any external services. (e.g. `JavaScript, Node.js 22, Express.js + React 18, SQLite/PostgreSQL, Stripe + AWS SES`)"
+
+> "Do you have a style guide or brand reference for the UI? (Used in Milestone 5 — skip if no frontend.)
+>  - **A file path** — a Markdown, CSS, or PDF design guide (e.g. `D:\design\BRAND_GUIDE.md`)
+>  - **A URL** — a brand or design page to mimic; the skill will fetch its CSS and extract palette, fonts, and component patterns
+>  - **None** — skip Milestone 5; the functional-but-unstyled defaults from Milestone 4 are kept as-is"
+
 Store:
 - **PHASE2_SOURCE**: either a local directory path OR a session ID (determine from user answer)
 - **PROJECT_ROOT**: parent directory where the repo will be created
 - **REPO_NAME**: directory name for the new repo
 - **REPO_PATH**: `{PROJECT_ROOT}/{REPO_NAME}`
+- **TECH_STACK**: language, runtime, framework(s), database, external services
+- **STYLE_SOURCE**: a file path, a URL, or `none` — determines whether Milestone 5 runs
 
 ---
 
@@ -41,7 +50,6 @@ If PHASE2_SOURCE is a directory path, set **PHASE2_DIR** = that path and read th
 
 | File | Variable | Contains |
 |---|---|---|
-| `{PHASE2_DIR}/raw/coding_brief.txt` | CODING_BRIEF | DDD layer map, directory skeleton, dependency list, coding standards, commit plan, validation gate |
 | `{PHASE2_DIR}/raw/domain_model.txt` | DOMAIN_MODEL | Aggregates, value objects, invariants, repository interfaces |
 | `{PHASE2_DIR}/raw/naming_dictionary.txt` | NAMING_DICT | Canonical names, banned synonyms, SQL/JSON/UI forms |
 | `{PHASE2_DIR}/raw/use_case_catalog.txt` | USE_CASES | UC-XX IDs, Gherkin scenarios, actors, req_refs |
@@ -61,7 +69,6 @@ If PHASE2_SOURCE is a session ID:
 
 | Agent ID | Variable | Local filename |
 |---|---|---|
-| `RE_CODING_BRIEF_WRITER_V1` | CODING_BRIEF | `coding_brief.txt` |
 | `RE_DOMAIN_MODELER_V1` | DOMAIN_MODEL | `domain_model.txt` |
 | `RE_NAMING_CONVENTION_ARCHITECT_V1` | NAMING_DICT | `naming_dictionary.txt` |
 | `RE_USE_CASE_ANALYST_V1` | USE_CASES | `use_case_catalog.txt` |
@@ -70,7 +77,7 @@ If PHASE2_SOURCE is a session ID:
 | `RE_TEST_STRATEGIST_V1` | TEST_STRATEGY | `test_strategy.txt` |
 | `RE_FIELD_DEFINITIONS_CATALOG_V1` | FIELD_DEFS | `field_definitions.txt` (optional) |
 
-   If an agent ID is absent from `available_outputs`, check for a human-reviewed version with the same prefix (e.g. `RE_FIELD_DEFINITIONS_REVIEW_V1`). FIELD_DEFS is optional — warn and continue if absent. If any of the other 7 are missing, stop and report which are absent.
+   If an agent ID is absent from `available_outputs`, check for a human-reviewed version with the same prefix (e.g. `RE_FIELD_DEFINITIONS_REVIEW_V1`). FIELD_DEFS is optional — warn and continue if absent. If any of the other 6 core contracts are missing, stop and report which are absent.
 
 3. **Save every fetched output to disk** so future runs use Branch A and incur no further credit cost. Derive the directory from the session title:
    - `PHASE2_DIR` = `{PROJECT_ROOT}/outputs/YYYY-MM-DD_{session-title-slug}/`
@@ -79,13 +86,33 @@ If PHASE2_SOURCE is a session ID:
 
 ---
 
-Extract from CODING_BRIEF and store:
-- **TECH_STACK**: language, runtime, framework, database, testing tools
-- **DIR_SKELETON**: directory structure to create
-- **DEPENDENCIES**: per-service dependency tables (package names + version constraints)
-- **CODING_STANDARDS**: indent size, quote style, semicolons, comment policy, naming rules
-- **COMMIT_PLAN**: milestone table — what to commit and the validation command per milestone
-- **VALIDATION_GATE**: the single final command that proves the full stack
+Derive and store the following from the loaded contracts and Step 0 inputs:
+
+- **TECH_STACK**: from Step 0 — treat as authoritative for language, runtime, framework, database, and external services.
+
+- **DIR_SKELETON**: derive from DOMAIN_MODEL + TECH_STACK:
+  - `backend/src/domain/{aggregate}/` for every aggregate root in DOMAIN_MODEL
+  - `backend/src/application/useCases/` and `application/interfaces/`
+  - `backend/src/infrastructure/database/` + one sub-directory per DB engine in TECH_STACK
+  - `backend/src/infrastructure/` sub-directory per external service found in API_SCHEMA tags or operation descriptions (e.g. `stripe/`, `aws/`)
+  - `backend/src/interface/routes/`, `controllers/`, `middlewares/`
+  - `backend/tests/domain/`, `tests/application/`, `tests/infrastructure/`, `tests/interface/`, `tests/e2e/` — named to match the DDD layer terminology in TEST_STRATEGY
+  - `bff/src/` — always present; BFF is always a separate service
+  - `frontend/src/components/`, `pages/`, `hooks/` — if a SPA framework is in TECH_STACK
+
+- **DEPENDENCIES**: derive per service from:
+  - TECH_STACK: framework (e.g. `express`), SPA library (e.g. `react`, `react-dom`), DB driver(s) (e.g. `pg`, `sqlite3`), build tool (e.g. `vite` for React)
+  - API_SCHEMA: identify external service SDKs from endpoint tags and operation IDs (e.g. Stripe operations → `stripe` npm; SES delivery → `@aws-sdk/client-ses`)
+  - DOMAIN_MODEL + USE_CASES: identify specialist libraries from domain operations (e.g. QR code generation → `qrcode`; image processing, email templating)
+  - Always include: `jsonwebtoken` if API_SCHEMA defines a BearerAuth security scheme; `bcryptjs` if FIELD_DEFS or DOMAIN_MODEL references password hashing; `uuid` if UUIDs are generated at runtime and the runtime does not expose `crypto.randomUUID()`
+  - TEST_STRATEGY tooling column: `jest`, `supertest`, and any listed testing utilities
+
+- **CODING_STANDARDS**: derive from TECH_STACK + NAMING_DICT:
+  - JavaScript / Node.js: 2-space indent, single quotes, no semicolons, factory functions only (no `class` syntax), JSDoc on all exports, Node.js 22 built-in `fetch` for inter-service HTTP
+  - Field naming: camelCase for JS identifiers and JSON fields, snake_case for SQL columns — per NAMING_DICT `canonical_name` / `sql_column` mapping
+  - All canonical names in NAMING_DICT take precedence over any inferred name
+
+- **VALIDATION_GATE**: `npm test` at the repo root (or the test-runner equivalent for the language in TECH_STACK)
 
 ---
 
@@ -114,9 +141,9 @@ These are not application code — they are Vite's required entry points and bel
 
 ### 2b — Create package.json files
 
-Create one `package.json` per service listed in DIR_SKELETON, using the package names and version constraints from DEPENDENCIES in CODING_BRIEF.
+Create one `package.json` per service in DIR_SKELETON, using the DEPENDENCIES derived in Step 1. Also create a root `package.json` at the repo root — this is not a service; it only carries the `scripts` block.
 
-Wire the `scripts` section so every milestone validation command from COMMIT_PLAN is defined (e.g. `test:domain`, `test:application`, `test:infrastructure`, `test:interface`, `test:e2e`, `test:all`). The root `package.json` `test:all` script must run each milestone command sequentially.
+Wire the `scripts` section so every milestone validation command is defined: `test:domain`, `test:application`, `test:infrastructure`, `test:interface`, `test:e2e`. The root `package.json` `test` script must run each of these sequentially across all services.
 
 ### 2c — Create environment files
 
@@ -350,11 +377,11 @@ JWT authentication middleware:
 - Destructive actions (delete, deactivate, irreversible status changes) must require explicit
   user confirmation before the API call is made — a native confirm dialog is acceptable for a prototype
 
-**Styling — minimal CSS (one stylesheet, no framework):**
+**Styling — functional defaults (one stylesheet, no framework):**
 - Create `src/index.css` and import it in `src/main.jsx`
-- Style goal: clean, readable, demo-ready — not unstyled HTML, not a design system
-- Apply at minimum: a max-width centered layout, consistent font (system-ui or similar), card/panel for list items, clear button styles (primary action distinct from destructive), form field spacing, and a subtle colour accent for the primary action
-- Inline `style` props are acceptable for one-off adjustments; all base styles go in the stylesheet
+- Goal: navigable and not visually broken — Milestone 5 applies the real design system if STYLE_SOURCE is provided
+- Apply at minimum: a max-width centered layout, consistent font (system-ui or similar), distinct primary vs. destructive button styles, form field spacing, and basic table/card structure
+- Inline `style` props are acceptable for one-off adjustments; base styles go in the stylesheet
 
 Write interface integration tests (Supertest) from TEST_STRATEGY:
 - Backend: drive every route with a real Express app instance backed by an in-memory database
@@ -372,7 +399,65 @@ npm run test:interface
 
 ---
 
-## Step 7 — Milestone 5: E2E
+## Step 7 — Milestone 5: UI Styling
+
+**Skip this entire step if STYLE_SOURCE is `none`, or if there is no frontend in DIR_SKELETON.** Proceed directly to Step 8.
+
+### What to write
+
+#### Branch A — Style guide on disk
+
+If STYLE_SOURCE is a file path, read the file and extract:
+- **Palette**: background layers (page, card, input, elevated), text hierarchy (primary, secondary, muted, dim, disabled), accent colour(s), border colours, semantic states (error, success, warning)
+- **Typography**: font family (including any Google Fonts or self-hosted imports), font sizes and weights by role (page title, section heading, body, label, meta, badge), line heights, letter spacing
+- **Component patterns**: buttons (primary, ghost/outline, danger, disabled, size variants), cards (standard, highlighted, accent-border), form inputs and selects (background, border, focus ring), tables (header style, cell style), badges/pills, message blocks (error, success)
+- **Layout**: max content width, section/card padding, grid columns, mobile breakpoints
+
+#### Branch B — URL
+
+If STYLE_SOURCE is a URL, fetch the page using the WebFetch tool. Extract:
+- CSS custom properties / variables — these are the clearest source of palette and spacing tokens
+- `@font-face` or Google Fonts `@import` declarations — font family and weights
+- Recurring class patterns for buttons, cards, inputs, and tables — infer the component visual language from them
+- If minified/Tailwind/CSS-in-JS makes extraction unreliable, note what could be inferred and flag gaps as `[INFERRED — verify]`
+
+#### Implement the design system
+
+Using the extracted tokens:
+
+1. **Rewrite `frontend/src/index.css`** — full design system CSS:
+   - CSS custom properties for all palette and spacing tokens at `:root`
+   - Base reset and `body` styles (background, font, colour, line-height)
+   - All component classes: buttons, cards, form inputs/selects/labels, tables, badges, error/success messages, layout containers
+   - Responsive rules at the identified breakpoints
+
+2. **Update `frontend/index.html`** — add any `<link rel="preconnect">` and font `<link>` tags required by the design system
+
+3. **Update `frontend/src/main.jsx`** — confirm the stylesheet import is present (add if missing from Milestone 4)
+
+4. **Rewrite every page** in `frontend/src/pages/` — apply the design system classes throughout:
+   - Replace all generic element selectors and inline `style` props with design system classes
+   - Every page must use the correct layout container, typography roles, and component classes
+   - Preserve all existing state logic and API call behaviour exactly — only presentation changes
+
+**Design system rules:**
+- CSS custom properties are mandatory for every palette value — no hardcoded hex literals in component rules
+- Inline `style` props in JSX are only acceptable for values that cannot be expressed as a class (e.g. a width derived from runtime state) — not for colours, fonts, or spacing that belong in the stylesheet
+- The stylesheet must stand alone: removing all inline styles from JSX must leave the UI visually correct
+
+### Gate
+
+```bash
+npm run build   # run in the frontend service directory
+```
+
+- **Pass** (zero errors, zero warnings): stage all changed CSS and page files, commit:
+  `"style: apply {brand/source} design system to all frontend pages"`
+- **Fail**: surface the full build output. Fix the error. Re-run. Do not commit. Do not continue to Step 8.
+
+---
+
+## Step 8 — Milestone 6: E2E
 
 ### What to write
 
@@ -422,12 +507,12 @@ Then immediately run the full suite:
 
 ---
 
-## Step 8 — Report
+## Step 9 — Report
 
 ```
 Project       : {REPO_NAME}
 Location      : {REPO_PATH}
-Commits       : 6 (initial scaffold + 5 milestones)
+Commits       : 7 (initial scaffold + 6 milestones)
 Validation    : {VALIDATION_GATE} — PASS
 
 To run locally:
@@ -446,7 +531,7 @@ Then say: "Phase 3 complete. All milestone gates passed and committed. Proceed t
 
 - **Never advance past a failed gate.** Fix the failure, re-run, confirm green before committing or moving on.
 - **All names come from NAMING_DICT.** Use `canonical_name` for JS identifiers, `sql_column` for DB columns, `json_field` for API request/response fields. If a name is not in the dictionary, flag it with `[DECISION REQUIRED]`.
-- **No invented business rules.** If a decision is not present in the Phase 2 contracts, mark it `[DECISION REQUIRED: <description>]` in a code comment and report it in Step 8.
+- **No invented business rules.** If a decision is not present in the Phase 2 contracts, mark it `[DECISION REQUIRED: <description>]` in a code comment and report it in Step 9.
 - **Domain layer stays pure.** No I/O, no async, no external imports. No exceptions.
 - **Application layer never imports infrastructure.** Repositories are always injected.
 - **BFF uses Node.js 22 built-in fetch.** No proxy library.
