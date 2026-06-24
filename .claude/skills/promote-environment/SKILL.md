@@ -21,6 +21,13 @@ Store:
 
 Each higher level inherits all checks from levels below it. STG → PROD runs all checks from all three levels.
 
+**Level 3 only — UAT results file:**
+At Level 3, also look for the UAT results file. Check in this order:
+1. `{PROJECT_ROOT}/uat/uat_test_cases.md`
+2. If not found, ask: "Where is the completed UAT test cases file? (leave blank if UAT has not been run)"
+
+Store as **UAT_FILE** (absolute path or null).
+
 ---
 
 ## Step 1 — Read the Codebase
@@ -33,6 +40,53 @@ Before running any checks, read:
 - `README` or equivalent if present
 
 Do not guess at file content — read every file before drawing conclusions.
+
+**Level 3 only — parse UAT results:**
+
+If UAT_FILE is set, read it and extract the following. The file is Markdown produced by
+`/generate-uat-tests` — parse these patterns:
+
+1. **UC-IDs** — from `###` headings whose text ends with ` — UC-{ID}` (e.g. `### Login — UC-01`).
+   Collect every UC-ID present in the file as **UAT_UC_IDS**.
+
+2. **Test cases** — from `####` headings matching `TC-{NNN} ·`. Each `####` block belongs to the
+   most recently seen `###` UC-ID heading above it.
+
+3. **Status per test case** — from the **Execution Record** table immediately below each `####`
+   heading. The table has columns `Actual Result | Status | Tester | Date | Notes`. Read the
+   data row (the row after the `|---|` separator). The `Status` cell contains `PASS`, `FAIL`,
+   `BLOCKED`, or is blank (not run).
+
+4. **Business outcomes** — if a `## Business Outcomes` section exists, read its table. Each row
+   maps an outcome description to a list of UC-IDs. Store as **UAT_OUTCOMES**.
+
+5. **Scope delta** — if a `## Scope Delta` section exists, note how many untraced features and
+   unimplemented UC-IDs are listed.
+
+Build **UAT_RESULTS**:
+```
+{
+  "total": N,
+  "pass": N,
+  "fail": N,
+  "blocked": N,
+  "not_run": N,        // blank Status cell
+  "uc_ids": {
+    "UC-01": { "tests": [{"id":"TC-001","status":"PASS"}, ...] },
+    "UC-02": { "tests": [{"id":"TC-003","status":"FAIL"}, ...] },
+    ...
+  },
+  "uc_coverage": {     // UC-IDs with at least one PASS
+    "passing": [...],
+    "failing": [...],  // has tests but none are PASS
+    "blocked": [...],  // all tests BLOCKED, none PASS
+    "not_run": [...]   // all tests blank
+  },
+  "scope_delta": { "untraced": N, "unimplemented": N }
+}
+```
+
+If UAT_FILE is null, set UAT_RESULTS = null.
 
 ---
 
@@ -133,6 +187,21 @@ Work through every check at or below the requested level. For each check record:
 - [ ] Build output (if applicable) produces no errors or warnings
 - [ ] `README` contains accurate run-locally and deploy instructions
 
+**Functionality** *(Level 3 only — requires completed UAT file)*
+- [ ] UAT test cases file exists and has been located
+- [ ] All test cases have been executed — no blank Status cells remain
+- [ ] UC coverage is 100% — every UC-ID in the file has at least one PASS result
+- [ ] Test pass rate is 100% — no FAIL status in any test case
+- [ ] Scope delta is documented — untraced features and unimplemented UCs are noted
+
+Scoring rules:
+- UAT_FILE null → F (UAT not run — FAIL; cannot promote to PROD without human UAT sign-off)
+- any `not_run` > 0 → FAIL (incomplete UAT; all cases must be executed)
+- any UC-ID in `uc_coverage.failing` → FAIL (a requirement is demonstrably broken)
+- any UC-ID in `uc_coverage.not_run` → FAIL (a requirement was never tested)
+- any UC-ID in `uc_coverage.blocked` → WARN (environment constraint; document and accept)
+- all UC-IDs in `uc_coverage.passing` → PASS
+
 ---
 
 ## Step 3 — Produce the Report
@@ -174,6 +243,39 @@ N/A ({count}) — not applicable to this stack
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 - {check name}: {reason not applicable}
 ```
+
+**Level 3 only — append the Functionality Report section after PASSED / N/A:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FUNCTIONALITY REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+UAT file         : {UAT_FILE path, or "NOT FOUND — run /generate-uat-tests first"}
+Tests total      : {total}  (Pass: {pass}  Fail: {fail}  Blocked: {blocked}  Not run: {not_run})
+
+UC coverage      : {passing count} / {total uc count} ({pct}%)
+Test pass rate   : {pass} / {pass+fail} executed ({pct}%)   [excludes Blocked]
+Scope delta      : {untraced} untraced features · {unimplemented} unimplemented UC-IDs
+
+{If any UC-IDs are failing or not run, list them:}
+UC-IDs with no passing test:
+  ✗ UC-{ID} — {feature name}  [{FAIL / Not run / Blocked}]
+  ...
+
+{If UAT_OUTCOMES is present:}
+Business Outcome Coverage:
+  {For each outcome row:}
+  ✓ {outcome}  (UC-{IDs} — all PASS)
+  ✗ {outcome}  (UC-{IDs} — {one or more not passing})
+  ~ {outcome}  (UC-{IDs} — BLOCKED)
+
+FUNCTIONALITY SCORE: {pass}/{total} tests · {uc_passing}/{uc_total} UC-IDs · {PASS | FAIL | PARTIAL}
+```
+
+The FUNCTIONALITY SCORE line contributes to the overall RESULT:
+- Any Functionality FAIL → overall RESULT is BLOCKED (add F-entries in the FAILURES section above)
+- Any Functionality WARN (blocked UCs) → add W-entries in the WARNINGS section above
+- All Functionality PASS → does not change overall RESULT (other checks still apply)
 
 If RESULT is BLOCKED, end with:
 > "Resolve all FAILURES above and re-run `/promote-environment {level}` before proceeding."
