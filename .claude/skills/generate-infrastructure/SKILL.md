@@ -836,8 +836,15 @@ NEXT STEPS
 
 5. Set secret values (see SECRETS section above)
 
-6. Run /promote-environment (local → DEV) to verify the codebase is ready
-7. Run /pentest once the DEV environment is live
+6. Run /promote-environment 1 (local → DEV) to verify the codebase is ready, then repeat
+   steps 2-5 targeting `stg` to deploy to STG
+7. Run /promote-environment 2 (DEV → STG) against the STG-bound codebase before it goes live
+8. Run /pentest and /generate-uat-tests against the STG environment once it is live — STG,
+   not DEV, is the target: it is the more stable, closer-to-production environment
+9. Any code change made to fix a pentest or UAT finding invalidates the gates already
+   passed. Re-run /promote-environment from Level 1, redeploy through DEV and STG again,
+   and re-run pentest/UAT against the fresh STG deployment before proceeding
+10. Run /promote-environment 3 (STG → PROD) once pentest is clean and UAT is 100% passing
 ```
 
 ---
