@@ -115,7 +115,7 @@ Read the variant SKILL.md in full and extract **LANG_CONFIG** — the complete s
 language-specific constants and implementation guides defined in that file.
 
 If the file is not found, stop and report:
-> "No variant found for '{VARIANT}'. Available variants: js, go. To add a new language stack,
+> "No variant found for '{VARIANT}'. Available variants: js, go, python. To add a new language stack,
 > see CONTRIBUTING.md in the generate-speakmanai-code skill directory."
 
 ---

@@ -15,6 +15,7 @@ keyword in the router's table. That's it — you never modify the router itself.
 |---|---|---|
 | JavaScript / Node.js | `generate-speakmanai-code-js/` | "JavaScript", "Node.js", "TypeScript" |
 | Go | `generate-speakmanai-code-go/` | "Go", "Golang" |
+| Python / FastAPI | `generate-speakmanai-code-python/` | "Python", "FastAPI", "Flask", "Django" |
 
 To register a new variant, add a row to the table above in the router's `SKILL.md`
 Step 1c section.
@@ -78,6 +79,12 @@ with them — do not override them in the variant file.
 ---
 
 ## Variant File Template
+
+**Before writing your variant, read an existing one in full as a reference.** The Python
+variant (`generate-speakmanai-code-python/SKILL.md`) is the most complete example — it shows
+the expected depth for every key: annotated code blocks, error-mapping tables, fixture
+patterns, and multi-step test examples. Shallow placeholder prose is not enough; the router
+agent reads these guides verbatim to generate production code.
 
 Copy this template to `generate-speakmanai-code-{lang}/SKILL.md` and fill in every section.
 Delete any placeholder comments before publishing.
@@ -151,7 +158,9 @@ for {Language Name} projects. It is not invoked directly.
 <!-- true or false -->
 
 ### BFF_IMPLEMENTATION
-<!-- proxy pattern for the BFF layer; omit if BFF_PRESENT is false -->
+<!-- proxy pattern for the BFF layer.
+     This section must always be present — never omit it.
+     If BFF_PRESENT is false, write: "Not applicable — BFF_PRESENT is false." -->
 
 ### INTERFACE_TEST_GUIDE
 <!-- test server setup, assertion patterns for HTTP tests -->
