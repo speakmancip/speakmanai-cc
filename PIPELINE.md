@@ -133,10 +133,15 @@ version of the code that no longer exists once the fix lands.
 | | |
 |---|---|
 | Skills | `pentest` (orchestrator) + `pentest-execute` (worker, dispatched per task — never invoke directly) |
-| Consumes | An **approved engagement** in the separate pentest-platform-companion app (scope must already be `GATE_1_APPROVED` there) |
+| Consumes | An **approved engagement** in the separate [pentest-platform-companion](https://github.com/speakmancip/pentest-platform-companion) app (scope must already be `GATE_1_APPROVED` there) |
 | Produces | Structured findings + a full report, uploaded to the companion app; gate approvals (2, 3, 4) happen only in that app's UI, never via this skill |
 
-This gate has a hard external dependency the others don't: a running companion app (`pentest-platform-companion`) that owns scope approval, findings review, and report sign-off. It targets a **live STG environment** — more stable and closer to production than DEV — so run it after DEV *and* STG promotion, once STG is deployed. Any finding that requires a code fix means Level 1 and Level 2 promotion must be re-run before re-testing.
+This gate has a hard external dependency the others don't: a running instance of
+[pentest-platform-companion](https://github.com/speakmancip/pentest-platform-companion) that
+owns scope approval, findings review, and report sign-off. It targets a **live STG
+environment** — more stable and closer to production than DEV — so run it after DEV *and*
+STG promotion, once STG is deployed. Any finding that requires a code fix means Level 1 and
+Level 2 promotion must be re-run before re-testing.
 
 ---
 

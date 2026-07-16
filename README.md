@@ -17,7 +17,7 @@ a guided walkthrough that drives every phase for you.
 | 3 — Code Generation | Code Generator (router + JS/Go/Python variants) | `/generate-speakmanai-code` | Working, milestone-gated, git-committed codebase |
 | 4 — Infrastructure | Infrastructure & Hardening | `/generate-infrastructure` | Terraform (GCP/AWS/Azure) + pre-pentest security fixes |
 | Gate | Environment Promotion | `/promote-environment` | Pass/block report — local→DEV, DEV→STG, STG→PROD |
-| Gate | Penetration Test | `/pentest` (+ `/pentest-execute` worker) | Findings + report, via a companion-app engagement |
+| Gate | Penetration Test | `/pentest` (+ `/pentest-execute` worker) | Findings + report, via a [pentest-platform-companion](https://github.com/speakmancip/pentest-platform-companion) engagement |
 | Gate | UAT Test Generator | `/generate-uat-tests` | Human-executable UAT test cases, traced to use cases |
 | Guided | SDLC Shepherd | `/sdlc-pipeline` | Runs the phases above in order, carrying state between them |
 
@@ -36,6 +36,11 @@ a guided walkthrough that drives every phase for you.
 - SPEAKMAN.AI MCP server configured in your Claude Code settings
 - Python 3.9+
 - Node.js (for PDF generation — puppeteer is installed automatically by the install script)
+
+**For the `/pentest` gate only:** a running instance of
+[pentest-platform-companion](https://github.com/speakmancip/pentest-platform-companion) —
+it owns engagement scope, gate approvals, and findings review for that skill. None of the
+other skills need it.
 
 ---
 
