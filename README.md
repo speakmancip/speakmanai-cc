@@ -1,12 +1,30 @@
 # speakmanai-cc
 
-Claude Code skills for the [SPEAKMAN.AI](https://speakman.ai) MCP server (cloud) or the [local self-hosted version](https://github.com/speakmancip/speakmanai-local). Each skill orchestrates a full SPEAKMAN.AI session, downloads the agent outputs, and generates a locally-authored deliverable using a configurable document template.
+Claude Code skills for the [SPEAKMAN.AI](https://speakman.ai) MCP server (cloud) or the [local self-hosted version](https://github.com/speakmancip/speakmanai-local). Together these skills cover the full SDLC — architecture, requirements, code generation, infrastructure, UAT, environment promotion, and pentesting — each orchestrating a full SPEAKMAN.AI session (where applicable), downloading agent outputs, and generating a locally-authored deliverable or codebase.
+
+**New here?** Read **[PIPELINE.md](PIPELINE.md)** for the full phase-by-phase roadmap — what
+each skill consumes and produces, and what order to run them in. Or run `/sdlc-pipeline` for
+a guided walkthrough that drives every phase for you.
 
 ## Available Skills
 
+### The SDLC pipeline (run in order — see [PIPELINE.md](PIPELINE.md))
+
+| Phase | Skill | Command | Output |
+|---|---|---|---|
+| 1 — Architecture | Solution Architecture Document | `/generate-sad` | SAD — HTML + PDF, ARB-ready |
+| 2 — Requirements | Requirements Engineer | `/generate-requirements` | Domain model, naming dictionary, use cases, API/DB schema, test strategy |
+| 3 — Code Generation | Code Generator (router + JS/Go/Python variants) | `/generate-speakmanai-code` | Working, milestone-gated, git-committed codebase |
+| 4 — Infrastructure | Infrastructure & Hardening | `/generate-infrastructure` | Terraform (GCP/AWS/Azure) + pre-pentest security fixes |
+| Gate | Environment Promotion | `/promote-environment` | Pass/block report — local→DEV, DEV→STG, STG→PROD |
+| Gate | Penetration Test | `/pentest` (+ `/pentest-execute` worker) | Findings + report, via a companion-app engagement |
+| Gate | UAT Test Generator | `/generate-uat-tests` | Human-executable UAT test cases, traced to use cases |
+| Guided | SDLC Shepherd | `/sdlc-pipeline` | Runs the phases above in order, carrying state between them |
+
+### Adjacent tools (standalone — not part of the sequential pipeline)
+
 | Skill | Command | Workflow | Output |
 |---|---|---|---|
-| Solution Architecture Document | `/generate-sad` | `MCP_SOLUTION_ARCHITECTURE_V1` | SAD — HTML + PDF, ARB-ready |
 | Compliance Assessment Report | `/generate-compliance-report` | `MCP_COMPLIANCE_ASSESSMENT_V1` | Risk scores, gap analysis, remediation roadmap |
 | Workflow Creator | `/generate-speakmanai-workflow` | `WORKFLOW_CREATOR_V1` | Workflow definition JSON, ready for DB import |
 
