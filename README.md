@@ -2,6 +2,8 @@
 
 Claude Code skills for the [SPEAKMAN.AI](https://speakman.ai) MCP server (cloud) or the [local self-hosted version](https://github.com/speakmancip/speakmanai-local). Together these skills cover the full SDLC — architecture, requirements, code generation, infrastructure, UAT, environment promotion, and pentesting — each orchestrating a full SPEAKMAN.AI session (where applicable), downloading agent outputs, and generating a locally-authored deliverable or codebase.
 
+Read the writeup: [The SDLC as Claude Code Skills](https://consulting.speakman.ai/blogs/sdlc-as-claude-code-skills) on the SPEAKMAN.AI blog.
+
 **New here?** Read **[PIPELINE.md](PIPELINE.md)** for the full phase-by-phase roadmap — what
 each skill consumes and produces, and what order to run them in. Or run `/sdlc-pipeline` for
 a guided walkthrough that drives every phase for you.
@@ -12,7 +14,7 @@ a guided walkthrough that drives every phase for you.
 
 | Phase | Skill | Command | Output |
 |---|---|---|---|
-| 1 — Architecture | Solution Architecture Document | `/generate-sad` | SAD — HTML + PDF, ARB-ready |
+| 1 — Architecture | Solution Architecture Document | `/generate-sad` | SAD — HTML + PDF draft, ready for architect review before ARB submission |
 | 2 — Requirements | Requirements Engineer | `/generate-requirements` | Domain model, naming dictionary, use cases, API/DB schema, test strategy |
 | 3 — Code Generation | Code Generator (router + JS/Go/Python variants) | `/generate-speakmanai-code` | Working, milestone-gated, git-committed codebase |
 | 4 — Infrastructure | Infrastructure & Hardening | `/generate-infrastructure` | Terraform (GCP/AWS/Azure) + pre-pentest security fixes |
