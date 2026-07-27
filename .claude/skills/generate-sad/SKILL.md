@@ -82,7 +82,7 @@ Parsing happens at Step 3b, once the live schema arrives from the workflow. Load
 Call `start_session`:
 - `workflow_id`: `MCP_SOLUTION_ARCHITECTURE_V1`
 - `title`: Short title derived from the business description (max 60 chars)
-- `description`: Business description from **BUSINESS_CONTEXT only** (max 3000 chars — trim if needed, keep goal, scale, compliance). Do NOT include technology stack or capabilities detail — that belongs only in Step 3b.
+- `description`: Business description from **BUSINESS_CONTEXT only** (max 8000 chars — keep goal, scale, personas, compliance, and key constraints). Do NOT include technology stack or capabilities detail — that belongs only in Step 3b.
 
 Poll every 30 seconds until `status = AWAITING_INPUT`.
 

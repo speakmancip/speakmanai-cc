@@ -11,7 +11,10 @@ mkdir -p "$ASSET_DIR"
 
 # --- Skills ---
 
-SKILLS=("generate-sad" "generate-compliance-report" "generate-speakmanai-workflow")
+SKILLS=()
+for d in "$REPO_DIR"/.claude/skills/*/; do
+    SKILLS+=("$(basename "$d")")
+done
 
 for skill in "${SKILLS[@]}"; do
     src="$REPO_DIR/.claude/skills/$skill"
@@ -63,7 +66,8 @@ echo "Installation complete."
 echo "  Skills : $SKILL_DIR"
 echo "  Assets : $ASSET_DIR"
 echo ""
-echo "Usage: open Claude Code in any project directory and run /generate-sad, /generate-compliance-report, or /generate-speakmanai-workflow"
+echo "Usage: open Claude Code in any project directory and run any installed skill, e.g. /generate-sad"
+echo "  New here? See PIPELINE.md in this repo, or run /sdlc-pipeline for a guided walkthrough."
 echo "Requires: SPEAKMAN.AI MCP server configured in your Claude Code settings."
 echo ""
 echo "To use your own branding, add logo.png to: $ASSET_DIR/templates/corporate/"

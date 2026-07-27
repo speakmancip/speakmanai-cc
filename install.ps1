@@ -1,4 +1,4 @@
-# install.ps1 — Install SPEAKMAN.AI skills and supporting assets into Claude Code (Windows)
+# install.ps1 - Install SPEAKMAN.AI skills and supporting assets into Claude Code (Windows)
 
 $SkillDir  = Join-Path $env:USERPROFILE ".claude\skills"
 $AssetDir  = Join-Path $env:USERPROFILE ".claude\speakmanai-cc"
@@ -9,11 +9,7 @@ if (-not (Test-Path $SkillDir)) {
     New-Item -ItemType Directory -Path $SkillDir -Force | Out-Null
 }
 
-$Skills = @(
-    "generate-sad",
-    "generate-compliance-report",
-    "generate-speakmanai-workflow"
-)
+$Skills = Get-ChildItem -Path (Join-Path $PSScriptRoot ".claude\skills") -Directory | ForEach-Object { $_.Name }
 
 foreach ($Skill in $Skills) {
     $Src = Join-Path $PSScriptRoot ".claude\skills\$Skill"
@@ -63,7 +59,7 @@ npm install puppeteer --save 2>&1 | Out-Null
 if ($LASTEXITCODE -eq 0) {
     Write-Host "OK puppeteer installed"
 } else {
-    Write-Host "WARNING: npm install puppeteer failed — PDF generation will be unavailable."
+    Write-Host "WARNING: npm install puppeteer failed - PDF generation will be unavailable."
     Write-Host "         To install manually: cd $AssetDir && npm install puppeteer"
 }
 Pop-Location
@@ -73,7 +69,8 @@ Write-Host "Installation complete."
 Write-Host "  Skills : $SkillDir"
 Write-Host "  Assets : $AssetDir"
 Write-Host ""
-Write-Host "Usage: open Claude Code in any project directory and run /generate-sad, /generate-compliance-report, or /generate-speakmanai-workflow"
+Write-Host "Usage: open Claude Code in any project directory and run any installed skill, e.g. /generate-sad"
+Write-Host "  New here? See PIPELINE.md in this repo, or run /sdlc-pipeline for a guided walkthrough."
 Write-Host "Requires: SPEAKMAN.AI MCP server configured in your Claude Code settings."
 Write-Host ""
 Write-Host "To use your own branding, add logo.png to: $AssetDir\templates\corporate\"
