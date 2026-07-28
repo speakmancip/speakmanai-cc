@@ -1,3 +1,8 @@
+---
+name: generate-speakmanai-code-go
+description: Internal LANG_CONFIG reference for Go/BFF backend projects, read automatically by the generate-speakmanai-code router (Step 1c). Not a standalone workflow — do not trigger this on its own; use generate-speakmanai-code instead.
+---
+
 # generate-speakmanai-code-go — Go Variant
 
 This file is read by the `generate-speakmanai-code` router (Step 1c) to extract LANG_CONFIG

@@ -1,3 +1,8 @@
+---
+name: generate-infrastructure
+description: Generate Terraform infrastructure code (GCP/AWS/Azure) and apply pre-pentest application security hardening for a Phase 3 codebase. Use for Phase 4 of the SPEAKMAN.AI SDLC, after code generation and before pentest or environment promotion.
+---
+
 # generate-infrastructure — Phase 4: Terraform + Pre-Pentest Hardening
 
 You generate Terraform infrastructure code and apply pre-pentest application security hardening to a Phase 3 codebase. You work in three sequential gates: reconcile the architecture against the target cloud, harden the application code, then generate Terraform. You do not deploy — you produce files a human reviews and applies.

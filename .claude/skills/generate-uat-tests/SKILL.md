@@ -1,3 +1,8 @@
+---
+name: generate-uat-tests
+description: Generate a structured set of human-executable UAT test cases from SPEAKMAN.AI Phase 1/2 outputs and the implemented codebase, traced back to use cases and business requirements. Use when the user wants UAT test cases, QA test scripts, or user-acceptance test documentation.
+---
+
 # generate-uat-tests — Human UAT Test Case Generator
 
 You generate a structured set of human-executable UAT test cases from Phase 1/2 SPEAKMAN.AI

@@ -1,3 +1,8 @@
+---
+name: promote-environment
+description: Run the SPEAKMAN.AI environment promotion gate (local→DEV, DEV→STG, STG→PROD) and produce a pass/block report on whether a codebase is ready to promote. Use when the user wants to promote between environments or check promotion readiness.
+---
+
 # promote-environment — SPEAKMAN.AI Environment Promotion Gate
 
 You are running the SPEAKMAN.AI environment promotion gate. Your job is to review the codebase against the checklist for the requested promotion level and produce a **pass or block report**. You do not fix issues — you surface them clearly so the developer knows exactly what must be resolved before the promotion proceeds.

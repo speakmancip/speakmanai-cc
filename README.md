@@ -52,17 +52,21 @@ Clone this repository, then run the install script from within it.
 
 **Windows:**
 ```powershell
-git clone https://github.com/speakmancip/speakmanai-local.git
+git clone https://github.com/speakmancip/speakmanai-cc.git
 cd speakmanai-cc
 .\install.ps1
 ```
 
 **macOS / Linux:**
 ```bash
-git clone https://github.com/speakmancip/speakmanai-local.git
+git clone https://github.com/speakmancip/speakmanai-cc.git
 cd speakmanai-cc
 chmod +x install.sh && ./install.sh
 ```
+
+**Claude Desktop / claude.ai:** these skills also ship as a self-contained plugin — one upload
+gets you all of them, no clone or install script needed. See
+[`desktop-skills/README.md`](desktop-skills/README.md).
 
 The install script does two things:
 
