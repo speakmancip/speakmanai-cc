@@ -1,3 +1,8 @@
+---
+name: generate-speakmanai-code-js
+description: Internal LANG_CONFIG reference for JavaScript/Node.js projects, read automatically by the generate-speakmanai-code router (Step 1c). Not a standalone workflow — do not trigger this on its own; use generate-speakmanai-code instead.
+---
+
 # generate-speakmanai-code-js — JavaScript / Node.js Variant
 
 This file is read by the `generate-speakmanai-code` router (Step 1c) to extract LANG_CONFIG
