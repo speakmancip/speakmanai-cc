@@ -106,91 +106,17 @@ Where `{workflowId}` is the value of `workflow.workflowId` from the JSON.
 
 Before importing, scan every agent in the `agents` array for the agent ID `GENERIC_WORKFLOW_PLANNER`.
 
-**If `GENERIC_WORKFLOW_PLANNER` is present:**
+**If `GENERIC_WORKFLOW_PLANNER` is not present:** the generated workflow is missing its planner — this is a generation error. Flag it to the user before proceeding.
 
-`GENERIC_WORKFLOW_PLANNER` is the **required planner agent** for every workflow. The platform hardcodes this agent ID — renaming it will break the workflow entirely. The planner reads available agents from the database at runtime; its `systemPrompt` must remain generic and must never reference a specific workflow by name.
-
-Check the `systemPrompt` field. If it contains workflow-specific content (references a specific workflow ID, describes specific agent names, etc.), replace it with the canonical generic systemPrompt below:
-
+**If `GENERIC_WORKFLOW_PLANNER` is present:** it must be a **minimal stub, nothing else**:
+```json
+{ "agentId": "GENERIC_WORKFLOW_PLANNER", "workflows": ["<this workflow's ID>"] }
 ```
-System Role
-  You are a Workflow Planner. Your function is to receive a raw
-  user request and a predefined list of agents, and from these,
-  construct the initial WORKFLOW_EVENT JSON object that will kick
-   off a multi-agent process. You do not write prose; you are a
-  structured data generator.
+No `systemPrompt`, `agentType`, `model`, `temperature`, `mimeType`, `executionMode`, or any other field. `GENERIC_WORKFLOW_PLANNER` is a single agent document shared by every workflow on the platform — its real `systemPrompt`/config lives once, centrally, in the database (canonically mirrored in `speakmanai_lite/WorkflowsAndAgents/MCP_SOLUTION_ARCHITECTURE_V1.json`). The import tool (`import_agent`/`import_architecture_plan`) merges the `workflows` field into that shared document safely via `$addToSet` — but any other field present in this agent's JSON gets `$set` directly onto that same shared document, silently overwriting the real planner's prompt and config for every other workflow that depends on it.
 
-  Primary Directive
-  Based on the USER_PROMPT and the list of AVAILABLE_AGENTS
-  provided below, you MUST generate a single, valid JSON object
-  for the INITIAL_WORKFLOW_EVENT. Do not include the word "json",
-   markdown backticks, or any other text or explanation before or
-   after the JSON object.
+If the Analyst generated a full agent block here (a `systemPrompt`, its own `model`/`temperature`, etc. — this can happen if the model didn't fully apply its instructions), **do not "fix" it by writing in a canonical prompt.** Strip it down to just `{ "agentId": "GENERIC_WORKFLOW_PLANNER", "workflows": ["<this workflow's ID>"] }`, re-save with the `Write` tool, and report: "Reduced `GENERIC_WORKFLOW_PLANNER` to a minimal stub — the shared planner's real config lives centrally and must never be overwritten per-workflow."
 
-  Each agent in AVAILABLE_AGENTS has an ID, a Type, and a
-  Description. Use the Type field to set the correct step_type
-  for each step in the workflow plan.
-
-  step_type Rules — set step_type for each step based on the
-  agent's Type field:
-  - "AI"        — AI_WORKFLOW agents (standard LLM execution)
-  - "AGGREGATE" — AI_AGGREGATOR agents (parallel-branch workflows
-  ONLY — use when two or more AI steps run independently of each
-  other and their outputs must be combined. Do NOT use in
-  sequential workflows; the workflow completes automatically at
-  the final step.)
-  - "MCP_PAUSE" — MCP_* agents (pause the workflow and wait for
-  input via MCP client or the web UI)
-
-  Output Generation
-  You MUST generate a single JSON object with the following
-  structure. Ensure the JSON is valid.
-  Your entire response MUST be only the single JSON object. It
-  must start with the opening curly brace { and end with the
-  closing curly brace }.
-  critical important: Do not include the word "json", markdown
-  backticks, or any other text or explanation before or after the
-   JSON object.
-
-  INITIAL_WORKFLOW_EVENT JSON Structure:
-      {
-      "attributes": {
-          "workflow_id": "workflow-id",
-          "status": "starting"
-      },
-      "workflow_definition": {
-          "id": "dynamic-workflow-id",
-          "description": "A dynamically generated workflow.",
-          "steps": [
-              { "step_index": 0, "step_type": "AI",
-  "agents": ["AGENT_1"],   "dependencies": [] },
-              { "step_index": 1, "step_type": "MCP_PAUSE",
-  "agents": ["MCP_AGENT"], "dependencies": [0] },
-              { "step_index": 2, "step_type": "AI",
-  "agents": ["AGENT_2"],   "dependencies": [1] },
-              { "step_index": 3, "step_type": "AI",
-  "agents": ["AGENT_3"],   "dependencies": [1] },
-              { "step_index": 4, "step_type": "AGGREGATE",
-  "agents": ["AGG_AGENT"], "dependencies": ["*"] }
-          ]
-      },
-      "initial_input": "raw_user_prompt_from_input"
-      }
-```
-
-Also ensure these fields match the canonical values:
-- `model`: `"advanced"`
-- `temperature`: `0.1`
-- `mimeType`: `"application/json"`
-- `validatorAgentId`: `""`
-- `inputSchema`: `"{}"`
-- `minSubscriptionLevel`: `"trial"`
-
-Re-save the file with the `Write` tool and report: "Replaced workflow-specific systemPrompt on `GENERIC_WORKFLOW_PLANNER` with the canonical generic version."
-
-If `GENERIC_WORKFLOW_PLANNER` is **not** present, the generated workflow is missing its planner — this is a generation error. Flag it to the user before proceeding.
-
-If `GENERIC_WORKFLOW_PLANNER` is present and already has the generic systemPrompt, proceed directly to Step 5.
+If it's already a minimal stub, proceed directly to Step 5.
 
 ---
 
@@ -222,5 +148,5 @@ Then say:
 
 - The `systemPrompt` fields are generated by the AI. Review them before importing — especially validators, HITL agents, and any agent handling sensitive data.
 - `AI_VALIDATOR` agents appear in the `agents` array but are **not** workflow steps — they are attached to their primary agent via `validatorAgentId`.
-- If a `systemPrompt` field is empty string `""`, the Prompt Engineer did not populate it. Flag these before import.
-- **`GENERIC_WORKFLOW_PLANNER` is required and must never be renamed.** The platform hardcodes this agent ID as the planner for every workflow. Its `systemPrompt` must always be the canonical generic version (see Step 4b) — the planner reads agent metadata from the database at runtime, so no workflow-specific content belongs in the prompt. The canonical systemPrompt is embedded in Step 4b above and also lives in `speakmanai_lite/WorkflowsAndAgents/MCP_SOLUTION_ARCHITECTURE_V1.json`.
+- If a `systemPrompt` field is empty string `""`, the Prompt Engineer did not populate it. Flag these before import — except on `GENERIC_WORKFLOW_PLANNER`, which should have no `systemPrompt` field at all (see Step 4b), not an empty one.
+- **`GENERIC_WORKFLOW_PLANNER` is required and must never be renamed or given its own content.** It's a single shared agent document every workflow on the platform reuses — its real `systemPrompt`/config lives once, centrally, in the database (canonically mirrored in `speakmanai_lite/WorkflowsAndAgents/MCP_SOLUTION_ARCHITECTURE_V1.json`). This workflow's own JSON must reference it only as a minimal `{ "agentId": "GENERIC_WORKFLOW_PLANNER", "workflows": [...] }` stub (see Step 4b) — never with its own `systemPrompt` or config, which would overwrite the shared document for every other workflow on import.

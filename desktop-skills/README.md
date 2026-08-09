@@ -11,7 +11,7 @@ here is self-contained instead: each `skills/<name>/` folder bundles its own `pr
 ```
 desktop-skills/
 ├── build.ps1                    ← regenerates the zips below from source
-├── org-plugins/speakmanai-sdlc/ ← the plugin: all 14 SDLC skills, one upload
+├── org-plugins/speakmanai-sdlc/ ← the plugin: all 17 SDLC skills, one upload
 │   ├── .claude-plugin/plugin.json
 │   ├── version.json
 │   └── skills/<name>/SKILL.md   ← one per skill, self-contained
@@ -21,8 +21,10 @@ desktop-skills/
 
 `generate-sad` and `generate-compliance-report` are the only two skills that needed adapting
 from their Claude Code version (they're the two that generate a document via
-`prompts/*_agent_prompt.md` + `scripts/doc_writer.py`). The other 12 skills were already
-self-contained and are carried over unmodified from `.claude/skills/`.
+`prompts/*_agent_prompt.md` + `scripts/doc_writer.py`). The other 15 skills — including
+`generate-project-brief` (Phase 0, idea intake) and `generate-ux-design` (Phase 2.5, screen
+inventory + design mockups) — were already self-contained and are carried over unmodified from
+`.claude/skills/`.
 
 ## Installing (recommended): the plugin, one upload
 
@@ -33,7 +35,7 @@ below instead.
 1. Run `desktop-skills/build.ps1` (or use the `speakmanai-sdlc.zip` already there if you
    haven't changed anything).
 2. In Claude Desktop: **Cowork → Settings → Plugins → Upload**, select `speakmanai-sdlc.zip`.
-3. All 14 SDLC skills are now available in that conversation — Claude picks the right one
+3. All 17 SDLC skills are now available in that conversation — Claude picks the right one
    based on your request (there's no `/slash-command` triggering on Desktop the way Code has
    it, so just describe what you want: "generate a SAD for...", "give me UAT tests for...").
 
@@ -64,6 +66,11 @@ means one upload per skill you want, not one for the whole set.
   — you still get the Markdown and HTML, and the user can print the HTML to PDF from their own
   browser. Confirmed on at least one test machine that it does fall back cleanly (no
   puppeteer, HTML delivered).
+- **`generate-ux-design`'s review step is unverified in Cowork.** In Claude Code it publishes
+  each mockup as an Artifact for the human to actually look at before approving. Whether Cowork
+  has an equivalent capability hasn't been tested — if not, the skill still has the mockups'
+  raw HTML to fall back on (saved to disk, per its own Step 4), just without a rendered preview
+  in the conversation itself.
 - **`pentest` / `pentest-execute` are unverified in Cowork.** In Claude Code these lean on the
   Agent/Task subagent-dispatch mechanism and expect scanning tools to be reachable from the
   sandbox. Whether Cowork's VM has equivalent subagent dispatch and tooling hasn't been tested
@@ -75,4 +82,4 @@ means one upload per skill you want, not one for the whole set.
   Anthropic documents for centrally-managed Desktop deployments requires the enterprise
   "third-party inference" build; it isn't available on the standard Microsoft
   Store/consumer Desktop build. On that build, every user uploads the plugin themselves —
-  this whole setup gets you from 14 uploads down to 1, not down to 0.
+  this whole setup gets you from 17 uploads down to 1, not down to 0.
