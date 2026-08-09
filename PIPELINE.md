@@ -14,6 +14,9 @@ what that skill is doing under the hood, and for running any phase manually or o
 ## Flow
 
 ```
+/generate-project-brief          Phase 0 — Idea Intake (optional — Create/Update/Validate)
+        │
+        ▼
 /generate-sad                    Phase 1 — Solution Architecture Document
         │
         ▼
@@ -56,6 +59,23 @@ Level 3 as re-runnable in isolation after a fix elsewhere in the chain.
 
 `/generate-compliance-report` and `/generate-speakmanai-workflow` sit outside this chain —
 see [Adjacent tools](#adjacent-tools-not-part-of-the-sequential-chain) below.
+
+---
+
+## Phase 0 — Idea Intake (optional)
+
+| | |
+|---|---|
+| Skill | `generate-project-brief` |
+| Workflow | None — runs entirely in Claude Code, zero SPEAKMAN.AI credits |
+| Consumes | A raw idea in the user's own words, plus any source material (files, URLs, prior research) |
+| Produces | `outputs/YYYY-MM-DD_{slug}/brief.md` (+ `.memlog.md` audit trail, optional `addendum.md`) — vision, problem statement, goals/metrics, personas, scope, drivers, existing-vs-new capabilities, risks |
+| Feeds | Phase 1 (`brief.md` is a valid business-description file input to `/generate-sad` Step 1) or a Sizing & Investment Gate session (`MCP_SIZING_ESTIMATE_V1`) when cost/scope needs a gate before committing to full architecture |
+
+Skip this phase entirely if you already have a clear business description — Phase 1 accepts
+raw text, files, or URLs directly. Use it when the idea is still rough and needs coaching into
+something an architecture or sizing session can actually use. Supports three modes: Create a
+new brief, Update one against new information, or Validate one for rigor before trusting it.
 
 ---
 
@@ -172,6 +192,7 @@ Traceability chain this closes: **Business outcome → Requirement → Use Case 
 The shortest path from nothing to a promotable, pentested project:
 
 ```
+/generate-project-brief       (optional — only if the idea isn't already a clear description)
 /generate-sad
 /generate-requirements
 /generate-speakmanai-code

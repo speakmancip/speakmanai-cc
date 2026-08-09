@@ -6,14 +6,15 @@ description: Guided orchestrator that shepherds a project through the full SPEAK
 # sdlc-pipeline — SPEAKMAN.AI SDLC Shepherd
 
 You drive a project through the full pipeline documented in `PIPELINE.md` at the root of this
-repo: Phase 1 (Architecture) → Phase 2 (Requirements) → Phase 3 (Code Generation) → Phase 4
-(Infrastructure) → Promotion Gate 1 (local→DEV) → Promotion Gate 2 (DEV→STG) → Pentest + UAT
-(both against **STG**) → Promotion Gate 3 (STG→PROD).
+repo: Phase 0 (Idea Intake, optional) → Phase 1 (Architecture) → Phase 2 (Requirements) →
+Phase 3 (Code Generation) → Phase 4 (Infrastructure) → Promotion Gate 1 (local→DEV) →
+Promotion Gate 2 (DEV→STG) → Pentest + UAT (both against **STG**) → Promotion Gate 3
+(STG→PROD).
 
 **You do not reimplement any phase's logic.** Each phase already exists as its own skill
-(`generate-sad`, `generate-requirements`, `generate-speakmanai-code`, `generate-infrastructure`,
-`promote-environment`, `pentest`, `generate-uat-tests`). Your job is sequencing, state
-hand-off, and knowing where the pipeline must legitimately stop for a human.
+(`generate-project-brief`, `generate-sad`, `generate-requirements`, `generate-speakmanai-code`,
+`generate-infrastructure`, `promote-environment`, `pentest`, `generate-uat-tests`). Your job is
+sequencing, state hand-off, and knowing where the pipeline must legitimately stop for a human.
 
 **Three hard stops you cannot automate past:**
 1. **Pentest gate approvals** happen only in the pentest companion app's UI (Gate 2, 3, 4). You dispatch the engagement, then wait.
@@ -75,6 +76,7 @@ Store as **STATE**:
   "project_root": "",
   "tech_stack": "",
   "target_cloud": "",
+  "phase0_brief": null,
   "phase1_dir": null,
   "phase2_dir": null,
   "repo_path": null,
@@ -91,13 +93,29 @@ Never lose STATE between turns.
 
 ---
 
+## Step 1a — Phase 0: Idea Intake (optional)
+
+Ask: "Is the business idea already a clear description you could hand an architect, or is it
+still rough — a pitch, a Slack thread, a half-formed idea?"
+
+- **Already clear** — skip this step. Phase 1 accepts the raw text/file/URL directly.
+- **Still rough** — invoke `generate-project-brief` in Create mode. Let it run its own
+  discovery (fast path or coaching path is the user's call, not yours to preempt). When it
+  reports `brief.md`'s path, store as `STATE.phase0_brief`.
+
+Update checkpoint: `last_step_completed: "PHASE0_DONE"` (or skip straight to `"PHASE1_DONE"`
+bookkeeping if this step was skipped — no separate marker needed for a no-op).
+
+---
+
 ## Step 2 — Phase 1: Architecture
 
 Ask: "Run Phase 1 now with `/generate-sad`, or do you already have a SAD output directory?"
 
 - **Already have one** — collect the path, store as `STATE.phase1_dir`, skip invocation.
-- **Run it** — invoke the `generate-sad` skill. Let it run its own Step 0–6 exactly as
-  written; do not shortcut its business-input collection. When it reports its output
+- **Run it** — invoke the `generate-sad` skill. If `STATE.phase0_brief` is set, pre-answer its
+  Step 1 business-input question with that file path instead of asking the user to restate the
+  idea. Let it run the rest of its own Step 0–6 exactly as written. When it reports its output
   directory (`outputs/YYYY-MM-DD_{slug}/`), store as `STATE.phase1_dir`.
 
 Update checkpoint: `last_step_completed: "PHASE1_DONE"`.
@@ -276,6 +294,7 @@ Update checkpoint: `last_step_completed: "GATE3_PASSED"`.
 ══════════════════════════════════════════════════
   SDLC PIPELINE — {STATE.repo_name}
 ══════════════════════════════════════════════════
+Phase 0  Idea Intake        : {done | skipped} → {STATE.phase0_brief}
 Phase 1  Architecture      : {done | skipped} → {STATE.phase1_dir}
 Phase 2  Requirements       : done → {STATE.phase2_dir}
 Phase 3  Code Generation    : done → {STATE.repo_path}
