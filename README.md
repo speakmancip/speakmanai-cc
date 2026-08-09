@@ -17,6 +17,7 @@ a guided walkthrough that drives every phase for you.
 | 0 — Idea Intake | Project Brief (Create / Update / Validate) | `/generate-project-brief` | `brief.md` — structured idea brief, ready to feed Phase 1 or a sizing/investment gate. Zero credits, no MCP session. |
 | 1 — Architecture | Solution Architecture Document | `/generate-sad` | SAD — HTML + PDF draft, ready for architect review before ARB submission |
 | 2 — Requirements | Requirements Engineer | `/generate-requirements` | Domain model, naming dictionary, use cases, API/DB schema, test strategy |
+| 2.5 — UX Design | UX & Interface Design | `/generate-ux-design` | Screen inventory, Mermaid user flows, proposed design direction, self-contained HTML mockups for human review. Optional. |
 | 3 — Code Generation | Code Generator (router + JS/Go/Python variants) | `/generate-speakmanai-code` | Working, milestone-gated, git-committed codebase |
 | 4 — Infrastructure | Infrastructure & Hardening | `/generate-infrastructure` | Terraform (GCP/AWS/Azure) + pre-pentest security fixes |
 | Gate | Environment Promotion | `/promote-environment` | Pass/block report — local→DEV, DEV→STG, STG→PROD |

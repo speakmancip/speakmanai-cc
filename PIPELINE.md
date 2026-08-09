@@ -23,6 +23,9 @@ what that skill is doing under the hood, and for running any phase manually or o
 /generate-requirements           Phase 2 — Requirements & domain modeling (coding contracts)
         │
         ▼
+/generate-ux-design               Phase 2.5 — UX & interface design (optional — screen inventory,
+        │                          flow diagrams, mockups for human review)
+        ▼
 /generate-speakmanai-code         Phase 3 — Working, milestone-gated, committed codebase
    (router → -js / -go / -python variant)
         │
@@ -102,6 +105,28 @@ new brief, Update one against new information, or Validate one for rigor before 
 | Feeds | Phase 3 (all six contracts, read directly — no credits), Phase 4 (`api_schema.txt`, `database_schema.txt`, `test_strategy.txt`), `generate-uat-tests` (`use_case_catalog.txt`, `api_schema.txt`, `field_definitions.txt`) |
 
 Human-in-the-loop gates inside this workflow (`RE_TECH_STACK_PROVIDER_V1`, `RE_FIELD_DEFINITIONS_REVIEW_V1`, `RE_NAMING_REVIEW_V1`) are driven by the skill — you review and approve inline during the ~10–15 minute session.
+
+---
+
+## Phase 2.5 — UX & Interface Design (optional)
+
+| | |
+|---|---|
+| Skill | `generate-ux-design` |
+| Workflow | `MCP_UX_DESIGN_V1` |
+| Consumes | Phase 1 output (required or a business-text fallback) + optional Phase 2 output (richer use-case/field detail) + optional brand source (existing site, style guide — fetched directly by the workflow's own delegate step, not pre-parsed by the skill) |
+| Produces | `outputs/YYYY-MM-DD_{slug}/raw/` — `screen_inventory.json`, `flow_diagrams.md`, `design_system.json` — plus `outputs/YYYY-MM-DD_{slug}/mockups/*.html`, one real standalone file per mockup |
+| Feeds | Phase 3 (a reviewed visual target to build toward — the mockups are throwaway reference, never code to copy verbatim) |
+
+Maps architecture components to real UI surfaces, use cases/requirements to screens, and data
+entities to on-screen fields — then proposes a design direction and produces self-contained
+HTML mockups for a small set of the highest-priority screens (not full page-by-page coverage;
+screens that would repeat an already-proven pattern are explicitly skipped, with a reason,
+rather than silently omitted). One delegate step (the mockup design itself — real design
+reasoning belongs to whichever agent is actually connected, not a fixed background model) and
+one human review gate (`generate-ux-design` must surface every mockup individually and submit
+the user's real answer — never self-approve). Skip this phase entirely and Phase 3 will infer
+UI decisions on its own instead of building toward a reviewed target.
 
 ---
 
@@ -196,6 +221,7 @@ The shortest path from nothing to a promotable, pentested project:
 /generate-project-brief       (optional — only if the idea isn't already a clear description)
 /generate-sad
 /generate-requirements
+/generate-ux-design           (optional — skip and Phase 3 infers UI decisions on its own)
 /generate-speakmanai-code
 /generate-infrastructure
 /promote-environment          (level 1: local → DEV) → deploy to DEV

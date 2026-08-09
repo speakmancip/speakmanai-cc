@@ -79,6 +79,7 @@ Store as **STATE**:
   "phase0_brief": null,
   "phase1_dir": null,
   "phase2_dir": null,
+  "phase25_dir": null,
   "repo_path": null,
   "uat_file": null,
   "fix_cycles": 0,
@@ -143,10 +144,32 @@ Update checkpoint: `last_step_completed: "PHASE2_DONE"`.
 
 ---
 
+## Step 3a — Phase 2.5: UX Design (optional)
+
+Ask: "Run Phase 2.5 (`/generate-ux-design`) now? It maps the architecture and requirements
+into a screen inventory and produces mockups for you to review before code generation — skip
+it and Phase 3 will infer UI decisions on its own instead of building toward a reviewed target."
+
+- **Skip** — no state change, continue to Step 4.
+- **Run it** — invoke `generate-ux-design`. Pre-answer:
+  - Phase 1 source → `STATE.phase1_dir`
+  - Phase 2 source → `STATE.phase2_dir`
+  - Output parent → `STATE.project_root`
+  Let it drive its own delegate step (mockup design — this is real work you do yourself when
+  the pause reaches you) and its human review gate exactly as written — **never self-approve
+  the design review on the user's behalf**, surface every mockup individually. When it reports
+  its output directory, store as `STATE.phase25_dir`.
+
+Update checkpoint: `last_step_completed: "PHASE25_DONE"` (or leave at `"PHASE2_DONE"` if skipped
+— no separate marker needed for a no-op).
+
+---
+
 ## Step 4 — Phase 3: Code Generation
 
 Invoke `generate-speakmanai-code`. Pre-answer:
 - Phase 2 source → `STATE.phase2_dir`
+- Phase 2.5 UX mockups (if `STATE.phase25_dir` is set) → point it at the `mockups/` directory as a visual reference target, not code to copy verbatim
 - Project root / repo name → `STATE.project_root` / `STATE.repo_name`
 - Tech stack → `STATE.tech_stack` (still let the router confirm the derived VARIANT — if it
   doesn't match what you expected, surface that mismatch to the user before proceeding)
@@ -297,6 +320,7 @@ Update checkpoint: `last_step_completed: "GATE3_PASSED"`.
 Phase 0  Idea Intake        : {done | skipped} → {STATE.phase0_brief}
 Phase 1  Architecture      : {done | skipped} → {STATE.phase1_dir}
 Phase 2  Requirements       : done → {STATE.phase2_dir}
+Phase 2.5 UX Design         : {done | skipped} → {STATE.phase25_dir}
 Phase 3  Code Generation    : done → {STATE.repo_path}
 Phase 4  Infrastructure     : done → {STATE.repo_path}/infra
 Gate     Promotion 1 (DEV)  : PASS
