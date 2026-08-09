@@ -30,6 +30,7 @@ a guided walkthrough that drives every phase for you.
 |---|---|---|---|
 | Compliance Assessment Report | `/generate-compliance-report` | `MCP_COMPLIANCE_ASSESSMENT_V1` | Risk scores, gap analysis, remediation roadmap |
 | Workflow Creator | `/generate-speakmanai-workflow` | `WORKFLOW_CREATOR_V1` | Workflow definition JSON, ready for DB import |
+| Skill Workflow Creator | `/generate-speakmanai-skill-workflow` | `CLAUDE_SKILL_WORKFLOW_CREATOR_V1` | Delegate-first workflow definition JSON — agents that need external data/tools run directly via the connected coding agent instead of pausing for a human |
 
 ---
 

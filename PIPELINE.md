@@ -184,6 +184,7 @@ Traceability chain this closes: **Business outcome → Requirement → Use Case 
 |---|---|
 | `generate-compliance-report` | Runs `MCP_COMPLIANCE_ASSESSMENT_V1` independently against any system/process description — risk scores, gap analysis, remediation roadmap. Useful before Phase 1 (scoping compliance constraints) or standalone against an existing system; not gated on any other phase. |
 | `generate-speakmanai-workflow` | Meta-tool for defining a *new* SPEAKMAN.AI workflow (ready for DB import). This is platform tooling for extending SPEAKMAN.AI itself — it does not build or ship an end-user project. |
+| `generate-speakmanai-skill-workflow` | Same purpose as `generate-speakmanai-workflow`, but for *delegate-first* workflows — every agent that needs external data or tools runs directly via the connected coding agent's own tools (filesystem, web, MCP servers) instead of pausing for a human to supply it. Use this one when the generated workflow should run primarily inside a coding-agent session; use `generate-speakmanai-workflow` when it should run unattended against a hosted background model. |
 
 ---
 
