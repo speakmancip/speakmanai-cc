@@ -377,10 +377,26 @@ def build_html(doc_title, subtitle, body_html, toc_sections, logo_b64, page_titl
 def generate_pdf(html_path: Path, pdf_path: Path):
     """Try puppeteer via Node, then pyppeteer, then warn."""
     # Try Node + puppeteer (most common in this project's environment)
+    # Puppeteer's own version-pinned browser cache can drift out of sync with
+    # what a given puppeteer version expects (observed here: cache had Chrome
+    # 131/146, puppeteer 25.3.0 wanted a different pinned build). Prefer a
+    # system Chrome/Edge install when present - more reliable than depending
+    # on puppeteer's bundled-browser cache staying in sync across upgrades.
+    system_browser_candidates = [
+        r'C:\Program Files\Google\Chrome\Application\chrome.exe',
+        r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
+        r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe',
+        r'C:\Program Files\Microsoft\Edge\Application\msedge.exe',
+    ]
+    system_browser = next((p for p in system_browser_candidates if Path(p).exists()), None)
     node_script = f"""
-const puppeteer = require('puppeteer');
 (async () => {{
-  const browser = await puppeteer.launch({{headless: 'new'}});
+  const puppeteer = (await import('puppeteer')).default;
+  const launchOpts = {{headless: 'new'}};
+  if (process.env.PDF_GEN_CHROME_PATH) {{
+    launchOpts.executablePath = process.env.PDF_GEN_CHROME_PATH;
+  }}
+  const browser = await puppeteer.launch(launchOpts);
   const page = await browser.newPage();
   await page.goto('file:///{html_path.resolve().as_posix()}', {{waitUntil: 'networkidle0'}});
   await page.pdf({{
@@ -392,15 +408,23 @@ const puppeteer = require('puppeteer');
   await browser.close();
 }})();
 """
-    node_script_path = html_path.parent / '_pdf_gen.js'
+    # Puppeteer (v25+) ships as a pure ESM package, so `require('puppeteer')` fails
+    # regardless of NODE_PATH (NODE_PATH is a CJS-only lookup mechanism; ESM's
+    # import() resolves via normal node_modules directory walk-up instead).
+    # Writing the temp script inside scripts/ (a sibling of node_modules/) ensures
+    # `import('puppeteer')` resolves it without needing any extra resolution hints.
+    node_script_path = Path(__file__).parent / '_pdf_gen.js'
     node_modules = Path(__file__).parent.parent / 'node_modules'
 
     try:
         node_script_path.write_text(node_script, encoding='utf-8')
+        pdf_env = {**os.environ, 'NODE_PATH': str(node_modules)}
+        if system_browser:
+            pdf_env['PDF_GEN_CHROME_PATH'] = system_browser
         result = subprocess.run(
             ['node', str(node_script_path)],
             capture_output=True, text=True,
-            env={**os.environ, 'NODE_PATH': str(node_modules)}
+            env=pdf_env
         )
         node_script_path.unlink(missing_ok=True)
         if result.returncode == 0 and pdf_path.exists():

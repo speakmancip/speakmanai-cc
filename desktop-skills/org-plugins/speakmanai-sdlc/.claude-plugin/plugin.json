@@ -1,5 +1,5 @@
 {
   "name": "speakmanai-sdlc",
-  "version": "1.2.0",
-  "description": "SPEAKMAN.AI SDLC skills for Claude Desktop (architecture, requirements, code generation, infrastructure, UAT, environment promotion, pentest, compliance)."
+  "version": "1.3.0",
+  "description": "SPEAKMAN.AI SDLC skills for Claude Desktop (idea intake, architecture, requirements, UX design, code generation, infrastructure, UAT, environment promotion, pentest, compliance)."
 }

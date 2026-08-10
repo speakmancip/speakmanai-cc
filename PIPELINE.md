@@ -14,11 +14,17 @@ what that skill is doing under the hood, and for running any phase manually or o
 ## Flow
 
 ```
+/generate-project-brief          Phase 0 — Idea Intake (optional — Create/Update/Validate)
+        │
+        ▼
 /generate-sad                    Phase 1 — Solution Architecture Document
         │
         ▼
 /generate-requirements           Phase 2 — Requirements & domain modeling (coding contracts)
         │
+        ▼
+/generate-ux-design               Phase 2.5 — UX & interface design (optional — screen inventory,
+        │                          flow diagrams, mockups for human review)
         ▼
 /generate-speakmanai-code         Phase 3 — Working, milestone-gated, committed codebase
    (router → -js / -go / -python variant)
@@ -59,6 +65,23 @@ see [Adjacent tools](#adjacent-tools-not-part-of-the-sequential-chain) below.
 
 ---
 
+## Phase 0 — Idea Intake (optional)
+
+| | |
+|---|---|
+| Skill | `generate-project-brief` |
+| Workflow | None — runs entirely in Claude Code, zero SPEAKMAN.AI credits |
+| Consumes | A raw idea in the user's own words, plus any source material (files, URLs, prior research) |
+| Produces | `outputs/YYYY-MM-DD_{slug}/brief.md` (+ `.memlog.md` audit trail, optional `addendum.md`) — vision, problem statement, goals/metrics, personas, scope, drivers, existing-vs-new capabilities, risks |
+| Feeds | Phase 1 (`brief.md` is a valid business-description file input to `/generate-sad` Step 1) or a Sizing & Investment Gate session (`MCP_SIZING_ESTIMATE_V1`) when cost/scope needs a gate before committing to full architecture |
+
+Skip this phase entirely if you already have a clear business description — Phase 1 accepts
+raw text, files, or URLs directly. Use it when the idea is still rough and needs coaching into
+something an architecture or sizing session can actually use. Supports three modes: Create a
+new brief, Update one against new information, or Validate one for rigor before trusting it.
+
+---
+
 ## Phase 1 — Architecture
 
 | | |
@@ -82,6 +105,28 @@ see [Adjacent tools](#adjacent-tools-not-part-of-the-sequential-chain) below.
 | Feeds | Phase 3 (all six contracts, read directly — no credits), Phase 4 (`api_schema.txt`, `database_schema.txt`, `test_strategy.txt`), `generate-uat-tests` (`use_case_catalog.txt`, `api_schema.txt`, `field_definitions.txt`) |
 
 Human-in-the-loop gates inside this workflow (`RE_TECH_STACK_PROVIDER_V1`, `RE_FIELD_DEFINITIONS_REVIEW_V1`, `RE_NAMING_REVIEW_V1`) are driven by the skill — you review and approve inline during the ~10–15 minute session.
+
+---
+
+## Phase 2.5 — UX & Interface Design (optional)
+
+| | |
+|---|---|
+| Skill | `generate-ux-design` |
+| Workflow | `MCP_UX_DESIGN_V1` |
+| Consumes | Phase 1 output (required or a business-text fallback) + optional Phase 2 output (richer use-case/field detail) + optional brand source (existing site, style guide — fetched directly by the workflow's own delegate step, not pre-parsed by the skill) |
+| Produces | `outputs/YYYY-MM-DD_{slug}/raw/` — `screen_inventory.json`, `flow_diagrams.md`, `design_system.json` — plus `outputs/YYYY-MM-DD_{slug}/mockups/*.html`, one real standalone file per mockup |
+| Feeds | Phase 3 (a reviewed visual target to build toward — the mockups are throwaway reference, never code to copy verbatim) |
+
+Maps architecture components to real UI surfaces, use cases/requirements to screens, and data
+entities to on-screen fields — then proposes a design direction and produces self-contained
+HTML mockups for a small set of the highest-priority screens (not full page-by-page coverage;
+screens that would repeat an already-proven pattern are explicitly skipped, with a reason,
+rather than silently omitted). One delegate step (the mockup design itself — real design
+reasoning belongs to whichever agent is actually connected, not a fixed background model) and
+one human review gate (`generate-ux-design` must surface every mockup individually and submit
+the user's real answer — never self-approve). Skip this phase entirely and Phase 3 will infer
+UI decisions on its own instead of building toward a reviewed target.
 
 ---
 
@@ -164,6 +209,7 @@ Traceability chain this closes: **Business outcome → Requirement → Use Case 
 |---|---|
 | `generate-compliance-report` | Runs `MCP_COMPLIANCE_ASSESSMENT_V1` independently against any system/process description — risk scores, gap analysis, remediation roadmap. Useful before Phase 1 (scoping compliance constraints) or standalone against an existing system; not gated on any other phase. |
 | `generate-speakmanai-workflow` | Meta-tool for defining a *new* SPEAKMAN.AI workflow (ready for DB import). This is platform tooling for extending SPEAKMAN.AI itself — it does not build or ship an end-user project. |
+| `generate-speakmanai-skill-workflow` | Same purpose as `generate-speakmanai-workflow`, but for *delegate-first* workflows — every agent that needs external data or tools runs directly via the connected coding agent's own tools (filesystem, web, MCP servers) instead of pausing for a human to supply it. Use this one when the generated workflow should run primarily inside a coding-agent session; use `generate-speakmanai-workflow` when it should run unattended against a hosted background model. |
 
 ---
 
@@ -172,8 +218,10 @@ Traceability chain this closes: **Business outcome → Requirement → Use Case 
 The shortest path from nothing to a promotable, pentested project:
 
 ```
+/generate-project-brief       (optional — only if the idea isn't already a clear description)
 /generate-sad
 /generate-requirements
+/generate-ux-design           (optional — skip and Phase 3 infers UI decisions on its own)
 /generate-speakmanai-code
 /generate-infrastructure
 /promote-environment          (level 1: local → DEV) → deploy to DEV

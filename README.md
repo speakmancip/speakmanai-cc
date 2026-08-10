@@ -1,6 +1,6 @@
 # speakmanai-cc
 
-Claude Code skills for the [SPEAKMAN.AI](https://speakman.ai) MCP server (cloud) or the [local self-hosted version](https://github.com/speakmancip/speakmanai-local). Together these skills cover the full SDLC — architecture, requirements, code generation, infrastructure, UAT, environment promotion, and pentesting — each orchestrating a full SPEAKMAN.AI session (where applicable), downloading agent outputs, and generating a locally-authored deliverable or codebase.
+Claude Code skills for the [SPEAKMAN.AI](https://speakman.ai) MCP server (cloud) or the [local self-hosted version](https://github.com/speakmancip/speakmanai-local). Together these skills cover the full SDLC — idea intake, architecture, requirements, UX design, code generation, infrastructure, UAT, environment promotion, and pentesting — each orchestrating a full SPEAKMAN.AI session (where applicable), downloading agent outputs, and generating a locally-authored deliverable or codebase.
 
 Read the writeup: [The SDLC as Claude Code Skills](https://consulting.speakman.ai/blogs/sdlc-as-claude-code-skills) on the SPEAKMAN.AI blog.
 
@@ -14,8 +14,10 @@ a guided walkthrough that drives every phase for you.
 
 | Phase | Skill | Command | Output |
 |---|---|---|---|
+| 0 — Idea Intake | Project Brief (Create / Update / Validate) | `/generate-project-brief` | `brief.md` — structured idea brief, ready to feed Phase 1 or a sizing/investment gate. Zero credits, no MCP session. |
 | 1 — Architecture | Solution Architecture Document | `/generate-sad` | SAD — HTML + PDF draft, ready for architect review before ARB submission |
 | 2 — Requirements | Requirements Engineer | `/generate-requirements` | Domain model, naming dictionary, use cases, API/DB schema, test strategy |
+| 2.5 — UX Design | UX & Interface Design | `/generate-ux-design` | Screen inventory, Mermaid user flows, proposed design direction, self-contained HTML mockups for human review. Optional. |
 | 3 — Code Generation | Code Generator (router + JS/Go/Python variants) | `/generate-speakmanai-code` | Working, milestone-gated, git-committed codebase |
 | 4 — Infrastructure | Infrastructure & Hardening | `/generate-infrastructure` | Terraform (GCP/AWS/Azure) + pre-pentest security fixes |
 | Gate | Environment Promotion | `/promote-environment` | Pass/block report — local→DEV, DEV→STG, STG→PROD |
@@ -29,6 +31,7 @@ a guided walkthrough that drives every phase for you.
 |---|---|---|---|
 | Compliance Assessment Report | `/generate-compliance-report` | `MCP_COMPLIANCE_ASSESSMENT_V1` | Risk scores, gap analysis, remediation roadmap |
 | Workflow Creator | `/generate-speakmanai-workflow` | `WORKFLOW_CREATOR_V1` | Workflow definition JSON, ready for DB import |
+| Skill Workflow Creator | `/generate-speakmanai-skill-workflow` | `CLAUDE_SKILL_WORKFLOW_CREATOR_V1` | Delegate-first workflow definition JSON — agents that need external data/tools run directly via the connected coding agent instead of pausing for a human |
 
 ---
 
