@@ -121,15 +121,21 @@ then respond via `submit_response(session_id, response)`:
 - **`RE_TECH_STACK_PROVIDER_V1`** — submit TECH_STACK from Step 2, formatted to the gate's
   `schema`. Name concrete technologies (e.g. payment SDK, database engine, auth provider,
   messaging). Present the draft to the user and submit on confirmation.
-- **`RE_FIELD_DEFINITIONS_REVIEW_V1`** (reviewer) — `context` holds the field definitions
-  catalog for human review. Surface it to the user; submit their approval or edits. If the
-  user defers, approve as-is but report it in Step 5.
-- **`RE_NAMING_REVIEW_V1`** (reviewer) — `context` holds the naming dictionary for review.
-  Same handling: surface, collect edits or approval, submit.
+- **Any `*_HITL_V1` gate** (`RE_USE_CASE_HITL_V1`, `RE_DOMAIN_STRUCTURE_HITL_V1`,
+  `RE_DOMAIN_EVENTS_HITL_V1`, `RE_FIELD_DEFINITIONS_HITL_V1`, `RE_NAMING_HITL_V1`,
+  `RE_API_TYPES_HITL_V1`, `RE_API_ENDPOINTS_HITL_V1`, and any other agent ending `_HITL_V1`) —
+  `context` holds the content under review. Surface it to the user. The response is NOT a
+  direct edit — it's `{"status": "Approved"}` to continue, or
+  `{"status": "Update", "feedback": "describe exactly what to change and why"}` to send it
+  back for regeneration. On `Update` the origin agent regenerates and the same gate re-presents
+  the new version for another look, up to that agent's configured retry limit (usually 3
+  rounds) before the workflow advances regardless. If the user defers, approve as-is but
+  report it in Step 5.
 - **Any other gate** — present `prompt` + `context` to the user, collect the answer, submit.
 
-Reviewer gates are where stack-specific corrections are made by hand (e.g. renaming a
-vendor-specific field). Carry the user's intent through faithfully — do not silently rewrite.
+HITL gates are where stack-specific corrections are made — via feedback text describing the
+change, not a direct edit. Carry the user's intent through faithfully in the feedback you
+submit — do not silently soften or reinterpret it.
 
 Continue polling until `status = COMPLETED` (the full run takes ~10–15 minutes).
 
@@ -144,16 +150,17 @@ Branch A reads — do not use bash/Python to write:
 
 | Agent ID | Save as |
 |---|---|
-| `RE_DOMAIN_MODELER_V1` | `domain_model.txt` |
+| `RE_DOMAIN_MODEL_SYNTHESIS_V1` | `domain_model.txt` |
 | `RE_USE_CASE_ANALYST_V1` | `use_case_catalog.txt` |
-| `RE_API_SCHEMA_DESIGNER_V1` | `api_schema.txt` |
+| `RE_API_SCHEMA_SYNTHESIS_V1` | `api_schema.txt` |
 | `RE_DATABASE_SCHEMA_DESIGNER_V1` | `database_schema.txt` |
 | `RE_TEST_STRATEGIST_V1` | `test_strategy.txt` |
-| naming: `RE_NAMING_REVIEW_V1` if present, else `RE_NAMING_CONVENTION_ARCHITECT_V1` | `naming_dictionary.txt` |
-| field defs: `RE_FIELD_DEFINITIONS_REVIEW_V1` if present, else `RE_FIELD_DEFINITIONS_CATALOG_V1` | `field_definitions.txt` |
+| `RE_NAMING_CONVENTION_ARCHITECT_V1` | `naming_dictionary.txt` |
+| `RE_FIELD_DEFINITIONS_CATALOG_V1` | `field_definitions.txt` |
 
-**Prefer the reviewed/human-approved version** for naming and field definitions — the API and
-database designers depend on the reviewed outputs, so the saved file must match what they consumed.
+`RE_DOMAIN_MODEL_SYNTHESIS_V1` and `RE_API_SCHEMA_SYNTHESIS_V1` are synthesis aggregators — each merges two upstream sub-agents (domain structure + domain events; API types + API endpoints) back into the single combined document shape these filenames have always held. Fetch them the same way as any other agent; the merge already happened server-side.
+
+`RE_NAMING_CONVENTION_ARCHITECT_V1` and `RE_FIELD_DEFINITIONS_CATALOG_V1` already carry the human-approved content directly (both agents have their own HITL revision gate) — no separate "reviewed" agent ID to prefer.
 
 If any of the six core contracts (all except `field_definitions.txt`, which is optional) is
 absent from the manifest, stop and report which are missing — do not save a partial set as if complete.

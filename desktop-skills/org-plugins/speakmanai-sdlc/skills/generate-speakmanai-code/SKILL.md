@@ -76,13 +76,15 @@ in parallel via `get_output(session_id, agent_id)`:
 
 | Agent ID | Variable | Filename |
 |---|---|---|
-| `RE_DOMAIN_MODELER_V1` | DOMAIN_MODEL | `domain_model.txt` |
+| `RE_DOMAIN_MODEL_SYNTHESIS_V1` | DOMAIN_MODEL | `domain_model.txt` |
 | `RE_NAMING_CONVENTION_ARCHITECT_V1` | NAMING_DICT | `naming_dictionary.txt` |
 | `RE_USE_CASE_ANALYST_V1` | USE_CASES | `use_case_catalog.txt` |
-| `RE_API_SCHEMA_DESIGNER_V1` | API_SCHEMA | `api_schema.txt` |
+| `RE_API_SCHEMA_SYNTHESIS_V1` | API_SCHEMA | `api_schema.txt` |
 | `RE_DATABASE_SCHEMA_DESIGNER_V1` | DB_SCHEMA | `database_schema.txt` |
 | `RE_TEST_STRATEGIST_V1` | TEST_STRATEGY | `test_strategy.txt` |
 | `RE_FIELD_DEFINITIONS_CATALOG_V1` | FIELD_DEFS | `field_definitions.txt` (optional) |
+
+`RE_DOMAIN_MODEL_SYNTHESIS_V1` / `RE_API_SCHEMA_SYNTHESIS_V1` are synthesis aggregators that merge two upstream sub-agents server-side — fetch them like any other agent, the combined document shape is unchanged.
 
 Save every fetched file to `{PROJECT_ROOT}/outputs/YYYY-MM-DD_{slug}/raw/` so future runs
 use Branch A and incur no further credit cost.
