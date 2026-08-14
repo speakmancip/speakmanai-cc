@@ -7,7 +7,7 @@ description: Run a SPEAKMAN.AI compliance workflow and generate a Compliance Ass
 
 You are running the SPEAKMAN.AI Compliance Assessment. You will orchestrate a full SPEAKMAN.AI MCP session and produce a locally-generated Compliance Assessment Report from the agent outputs.
 
-Follow every step below exactly. Do not generate the report content yourself — it is built in Step 6 from real agent outputs.
+Follow every step below exactly. Do not generate the report content yourself — it is built in Step 5 from real agent outputs.
 
 ---
 
@@ -157,22 +157,7 @@ Use the stable filename mapping below (not the raw `agent_id`):
 
 ---
 
-## Step 5 — Choose Template
-
-Ask the user:
-
-> "Which document template?
-> - [default] — SPEAKMAN.AI branded
-> - [corporate] — your own brand (add logo.png to ~/.claude/speakmanai-cc/templates/corporate/)
-> - Or paste a path to a custom template directory"
-
-Default to `{ASSET_DIR}/templates/default` if the user presses Enter.
-
-Store the resolved template path as **TEMPLATE_DIR**.
-
----
-
-## Step 6 — Generate Local Compliance Report
+## Step 5 — Generate Local Compliance Report
 
 Using the downloaded raw agent outputs saved in `outputs/YYYY-MM-DD_{slug}/raw/`, follow the instructions in `{ASSET_DIR}/prompts/compliance_agent_prompt.md` exactly to generate the report.
 
@@ -184,23 +169,27 @@ Key rules for this step:
 
 ---
 
-## Step 7 — Build HTML and PDF
+## Step 6 — Render HTML
 
-Run the following commands:
+Call the `render_document` MCP tool:
+- `markdown`: the full content of `{slug}.md` from Step 5
+- `title`: the document's title (from its first `#` heading)
+- `subtitle`: e.g. `"Compliance Assessment Report · {frameworks} · {today's date}"`
 
-```bash
-python3 {ASSET_DIR}/scripts/preprocess.py outputs/YYYY-MM-DD_{slug}/{slug}.md
-python3 {ASSET_DIR}/scripts/doc_writer.py outputs/YYYY-MM-DD_{slug}/{slug}_clean.md \
-  --template {TEMPLATE_DIR} \
-  --output {absolute_path_to_output_dir}/{slug} \
-  --yes
-```
+The tool returns `{"html": "<full HTML document>"}`. Save that string to
+`outputs/YYYY-MM-DD_{slug}/{slug}.html`. The returned HTML is fully self-contained (inline CSS,
+embedded SPEAKMAN.AI logo) — no local scripts, templates, or `{ASSET_DIR}` lookup needed.
 
-> **Note:** Always use the **absolute path** for `--output`. Obtain it by running `pwd` in the project directory and appending the output subdirectory (e.g. `/home/user/myproject/outputs/2026-04-04_my-project/my-project`). A relative path causes `doc_writer.py` to double the directory prefix and fail with a `FileNotFoundError`.
+### Step 6b — Custom Branding (optional)
+
+If the user wants their own branding instead of the SPEAKMAN.AI default, edit the saved HTML
+file directly: swap the `<img src="...">` in the `.doc-header` for their logo, and adjust the
+header/accent colors in the `<style>` block if they gave you a brand color. This is a plain text
+edit — no template directory involved.
 
 ---
 
-## Step 8 — Report
+## Step 7 — Report
 
 Report the following to the user:
 
@@ -213,7 +202,6 @@ Critical gaps     : {critical_gap_count}
 Outputs
   Markdown        : outputs/{slug}/{slug}.md
   HTML            : outputs/{slug}/{slug}.html
-  PDF             : outputs/{slug}/{slug}.pdf
 ```
 
-Then say: "Review `{slug}.pdf` — this is your draft Compliance Assessment Report, ready for review before submission or remediation planning."
+Then say: "Review `{slug}.html` — this is your draft Compliance Assessment Report, ready for review before submission or remediation planning. Open it in a browser and use Print → Save as PDF if you need a PDF copy."

@@ -3,8 +3,9 @@
 The Claude Desktop / claude.ai counterpart to this repo's `.claude/skills/`. Claude Desktop
 skills run in Anthropic's own sandboxed VM (fresh per conversation), not on your machine, so
 they can't reach `~/.claude/speakmanai-cc` the way the Claude Code skills do. Every skill in
-here is self-contained instead: each `skills/<name>/` folder bundles its own `prompts/`,
-`scripts/`, and `templates/` rather than depending on a separate host install step.
+here is self-contained instead: 14 of the 17 are a single `SKILL.md`; `generate-sad` and
+`generate-compliance-report` each also bundle a `prompts/` folder (their document-synthesis
+instructions), and `generate-speakmanai-code` bundles a `CONTRIBUTING.md`.
 
 ## What's in here
 
@@ -20,8 +21,9 @@ desktop-skills/
 ```
 
 `generate-sad` and `generate-compliance-report` are the only two skills that needed adapting
-from their Claude Code version (they're the two that generate a document via
-`prompts/*_agent_prompt.md` + `scripts/doc_writer.py`). The other 15 skills — including
+from their Claude Code version (they're the two that generate a document: synthesis via
+`prompts/*_agent_prompt.md`, then rendering via the SPEAKMAN.AI MCP server's `render_document`
+tool). The other 15 skills — including
 `generate-project-brief` (Phase 0, idea intake) and `generate-ux-design` (Phase 2.5, screen
 inventory + design mockups) — were already self-contained and are carried over unmodified from
 `.claude/skills/`.
@@ -50,7 +52,8 @@ If Cowork/Plugins isn't available, each skill can be uploaded on its own through
 **Settings → Skills → Upload** — but that flow accepts exactly one `SKILL.md` per zip, so this
 means one upload per skill you want, not one for the whole set.
 
-- `generate-sad.zip` and `generate-compliance-report.zip` are pre-built by `build.ps1`.
+- `generate-sad.zip`, `generate-compliance-report.zip`, and `generate-speakmanai-code.zip` are
+  pre-built by `build.ps1`.
 - For any other skill, zip the corresponding folder under
   `org-plugins/speakmanai-sdlc/skills/<name>/` directly — each is already self-contained. The
   zip must contain the skill folder itself at its root (not just `SKILL.md` loose), and entries
@@ -59,13 +62,16 @@ means one upload per skill you want, not one for the whole set.
   a template if you need to zip one manually, or copy the folder into `desktop-skills/` and add
   a line to `build.ps1`.
 
+See also: [`COPILOT_STUDIO.md`](./COPILOT_STUDIO.md) for deploying these same skill packages to
+Microsoft Copilot Studio instead of/alongside Claude Desktop.
+
 ## Known gaps / things to verify before relying on this
 
-- **PDF generation is best-effort.** `doc_writer.py` needs Node.js + puppeteer in the sandbox
-  to render a PDF; that's not guaranteed to be present in Cowork's VM. It degrades gracefully
-  — you still get the Markdown and HTML, and the user can print the HTML to PDF from their own
-  browser. Confirmed on at least one test machine that it does fall back cleanly (no
-  puppeteer, HTML delivered).
+- ~~**PDF generation is best-effort.**~~ Resolved (2026-08-12): `generate-sad` and
+  `generate-compliance-report` no longer generate a PDF or depend on Node/puppeteer at all —
+  document rendering (Markdown → branded HTML) now happens server-side via the SPEAKMAN.AI MCP
+  server's `render_document` tool, so there's no longer a sandbox-capability question here. See
+  `LITE_ENHANCEMENTS.md` in the main `speakmanai_lite` repo for the full change.
 - **`generate-ux-design`'s review step is unverified in Cowork.** In Claude Code it publishes
   each mockup as an Artifact for the human to actually look at before approving. Whether Cowork
   has an equivalent capability hasn't been tested — if not, the skill still has the mockups'

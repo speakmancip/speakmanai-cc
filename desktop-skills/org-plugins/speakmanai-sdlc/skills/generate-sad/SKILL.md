@@ -7,13 +7,12 @@ description: Run a SPEAKMAN.AI architecture workflow and author a Solution Archi
 
 You are running the SPEAKMAN.AI SAD Generator. You will orchestrate a full SPEAKMAN.AI MCP session and author a Solution Architecture Document (SAD) from the agent outputs, inside this conversation's execution environment.
 
-Follow every step below exactly. Do not generate the SAD content yourself — it is built in Step 6 from real agent outputs.
+Follow every step below exactly. Do not generate the SAD content yourself — it is built in Step 5 from real agent outputs.
 
 **Prerequisites for this environment:**
-- The SPEAKMAN.AI MCP connector must be added under Settings → Connectors. If `start_session` / `get_outputs` / `submit_response` tools are not available, tell the user to add the connector before continuing.
-- PDF generation (Step 7) needs Node.js + puppeteer inside this session's sandbox. That is not guaranteed to be present here — if it's missing, the skill still delivers Markdown + HTML, and the user can print the HTML to PDF from their own browser after downloading it.
-- This skill's own folder (the one containing this SKILL.md) already bundles everything it needs — `prompts/`, `scripts/`, `templates/`. There is no separate host install step and no `~/.claude/speakmanai-cc` to resolve; reference bundled files with paths relative to this skill's folder, e.g. `prompts/sad_agent_prompt.md`.
-- This sandbox is ephemeral — it does not persist after the conversation ends. Every deliverable (the `.md`, `.html`, and `.pdf` if produced) must be surfaced to the user as a downloadable file before you finish, not just left on disk.
+- The SPEAKMAN.AI MCP connector must be added under Settings → Connectors. If `start_session` / `get_outputs` / `submit_response` / `render_document` tools are not available, tell the user to add the connector before continuing.
+- HTML rendering (Step 6) happens via the `render_document` MCP tool, server-side — no local Python, Node, or bundled scripts/templates are needed for it. This skill's own folder still bundles `prompts/` (the SAD synthesis instructions); reference it with a path relative to this skill's folder, e.g. `prompts/sad_agent_prompt.md`.
+- This sandbox is ephemeral — it does not persist after the conversation ends. Every deliverable (the `.md` and `.html`) must be surfaced to the user as a downloadable file before you finish, not just left on disk.
 
 ---
 
@@ -136,7 +135,7 @@ Then call `get_output` for these agents **only** — fetch in parallel where pos
 | `MCP_COMPLIANCE_OFFICER_V2` | Traceability matrix, violations, compliance score |
 | `MCP_TECHNICAL_VISUALIZATION_SPECIALIST_V1` | Raw Mermaid diagrams |
 
-> **Do NOT download `MCP_TECHNICAL_WRITER_V2`.** The Step 6 prompt replaces it.
+> **Do NOT download `MCP_TECHNICAL_WRITER_V2`.** The Step 5 prompt replaces it.
 
 Create the working directory in this session's sandbox: `outputs/YYYY-MM-DD_{slug}/raw/` where slug is a lowercase-hyphenated version of the session title and YYYY-MM-DD is today's date.
 
@@ -155,24 +154,7 @@ Use the stable filename mapping below (not the raw `agent_id`):
 
 ---
 
-## Step 5 — Choose Template
-
-Ask the user:
-
-> "Which document template?
-> - [default] — SPEAKMAN.AI branded, bundled with this skill
-> - [corporate] — your own brand. Upload a logo.png into this conversation and I'll use it for this run
-> - Or paste/upload a custom template directory"
-
-Default to this skill's own `templates/default` folder if the user presses Enter.
-
-If the user wants a corporate template for repeat use (not just this run), tell them: since this sandbox doesn't persist, the only way to make a corporate logo stick across future conversations is to add it to `templates/corporate/` in the skill package itself and re-upload the skill zip in Settings. For a one-off, uploading the logo into the conversation and pointing `--template` at that upload is enough.
-
-Store the resolved template path as **TEMPLATE_DIR**.
-
----
-
-## Step 6 — Generate SAD
+## Step 5 — Generate SAD
 
 Using the downloaded raw agent outputs saved in `outputs/YYYY-MM-DD_{slug}/raw/`, follow the instructions in this skill's `prompts/sad_agent_prompt.md` exactly to generate the SAD.
 
@@ -184,25 +166,30 @@ Key rules for this step:
 
 ---
 
-## Step 7 — Build HTML and PDF
+## Step 6 — Render HTML
 
-Run the following commands (this skill's `scripts/` folder, relative to this SKILL.md):
+Call the `render_document` MCP tool:
+- `markdown`: the full content of `{slug}.md` from Step 5
+- `title`: the document's title (from its first `#` heading)
+- `subtitle`: e.g. `"Solution Architecture Document · {today's date}"`
 
-```bash
-python3 scripts/preprocess.py outputs/YYYY-MM-DD_{slug}/{slug}.md
-python3 scripts/doc_writer.py outputs/YYYY-MM-DD_{slug}/{slug}_clean.md \
-  --template {TEMPLATE_DIR} \
-  --output outputs/YYYY-MM-DD_{slug}/{slug} \
-  --yes
-```
+The tool returns `{"html": "<full HTML document>"}`. Save that string to
+`outputs/YYYY-MM-DD_{slug}/{slug}.html`. The returned HTML is fully self-contained (inline CSS,
+embedded SPEAKMAN.AI logo) — no further build step is needed.
 
-`doc_writer.py` tries Node + puppeteer for the PDF step and prints a warning and continues if that's unavailable — it always produces the HTML regardless. **Do not treat a PDF failure as a skill failure.** If PDF generation was skipped, tell the user: "PDF generation isn't available in this session — here's the Markdown and HTML; open the HTML and use your browser's Print → Save as PDF to get a PDF copy."
+### Step 6b — Custom Branding (optional)
+
+If the user wants their own branding instead of the SPEAKMAN.AI default, edit the saved HTML
+directly: swap the `<img src="...">` in the `.doc-header` for their logo (a data URI, or an
+uploaded image reference), and adjust the header/accent colors in the `<style>` block if they
+gave you a brand color. This is a plain text edit — no template files or scripts involved.
 
 ---
 
-## Step 8 — Deliver and Report
+## Step 7 — Deliver and Report
 
-Make sure `{slug}.md`, `{slug}.html`, and `{slug}.pdf` (if produced) are all offered to the user as downloadable files from this conversation — this sandbox does not persist, so anything not downloaded now is lost.
+Make sure `{slug}.md` and `{slug}.html` are both offered to the user as downloadable files from
+this conversation — this sandbox does not persist, so anything not downloaded now is lost.
 
 Report:
 
@@ -213,7 +200,6 @@ Compliance   : {score}/10 — {status}
 Outputs
   Markdown   : {slug}.md
   HTML       : {slug}.html
-  PDF        : {slug}.pdf (or "not generated — see HTML")
 ```
 
-Then say: "Review `{slug}.pdf` (or `{slug}.html` if no PDF was generated) — this is your draft SAD, ready for architect review before ARB submission."
+Then say: "Review `{slug}.html` — this is your draft SAD, ready for architect review before ARB submission. Open it in a browser and use Print → Save as PDF if you need a PDF copy."
