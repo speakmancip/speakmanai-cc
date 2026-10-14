@@ -169,16 +169,27 @@ Key rules for this step:
 
 ---
 
-## Step 6 — Render HTML
+## Step 6 — Render HTML (only if asked for)
 
-Call the `render_document` MCP tool:
-- `markdown`: the full content of `{slug}.md` from Step 5
-- `title`: the document's title (from its first `#` heading)
-- `subtitle`: e.g. `"Compliance Assessment Report · {frameworks} · {today's date}"`
+HTML is optional, and only on request. The Markdown file from Step 5 is the deliverable. Do this step only if
+the user asked for an HTML version (or a PDF, which is printed from the HTML). Otherwise skip to Step 7 and
+offer the HTML in your report.
 
-The tool returns `{"html": "<full HTML document>"}`. Save that string to
-`outputs/YYYY-MM-DD_{slug}/{slug}.html`. The returned HTML is fully self-contained (inline CSS,
-embedded SPEAKMAN.AI logo) — no local scripts, templates, or `{ASSET_DIR}` lookup needed.
+**If you can run Python** (Claude Code and the Claude app can), render the HTML locally. The document
+never passes through you, which saves a lot of usage allowance on a large document:
+
+```
+python "{ASSET_DIR}/scripts/render_html.py" "outputs/YYYY-MM-DD_{slug}/{slug}.md" "outputs/YYYY-MM-DD_{slug}/{slug}.html" --title "<the document's title>" --subtitle "Compliance Assessment Report - {frameworks} - {today's date}"
+```
+
+The script uses only the standard library, and its output is the same as the `render_document` tool's. Use `python3` if `python` is not found. Do not write your own renderer.
+
+**If you cannot run code**, call the `render_document` MCP tool with `markdown` (the full content of the
+Markdown file), `title` (the first `#` heading) and `subtitle` (`"Compliance Assessment Report - {frameworks} - {today's date}"`). It returns
+`{"html": "<full HTML document>"}`: save that string to `outputs/YYYY-MM-DD_{slug}/{slug}.html`.
+The HTML comes back as one tool result, about 1.3 times the size of the Markdown, and a large result may
+be cut off or refused by your client. If the Markdown is over about 40,000 characters, skip the HTML,
+deliver the Markdown file, and tell the user the HTML version was left out because the document is large.
 
 ### Step 6b — Custom Branding (optional)
 
@@ -201,7 +212,7 @@ Overall risk      : {risk_level} — {score}/10
 Critical gaps     : {critical_gap_count}
 Outputs
   Markdown        : outputs/{slug}/{slug}.md
-  HTML            : outputs/{slug}/{slug}.html
+  HTML            : outputs/{slug}/{slug}.html   (only if requested)
 ```
 
 Then say: "Review `{slug}.html` — this is your draft Compliance Assessment Report, ready for review before submission or remediation planning. Open it in a browser and use Print → Save as PDF if you need a PDF copy."
