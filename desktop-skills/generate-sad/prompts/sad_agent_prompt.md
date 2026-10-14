@@ -139,6 +139,7 @@ Label all edges with protocol/direction (HTTPS, REST mTLS, Publishes Events, SQL
 ### Process View - Primary User Flow
 [Mermaid sequenceDiagram for the core transaction flow.]
 Include: all participants with COMP-ID references, alt/else blocks for error and fallback paths.
+Do not put a semicolon in the text of a message. Mermaid can read it as the end of a statement and break the diagram. Use a comma, or split it into two messages.
 
 ### Deployment View
 [Table: Layer | Deployment | AZ count | Subnet type | Access method]
