@@ -29,9 +29,9 @@ foreach ($Skill in $Skills) {
     Write-Host "OK Skill installed -> $Dst"
 }
 
-# --- Supporting assets (prompts, scripts, templates) ---
+# --- Supporting assets (synthesis prompts) ---
 
-$Assets = @("prompts", "scripts", "templates")
+$Assets = @("prompts")
 
 foreach ($Asset in $Assets) {
     $Src = Join-Path $PSScriptRoot $Asset
@@ -51,19 +51,6 @@ foreach ($Asset in $Assets) {
     Write-Host "OK Asset installed  -> $Dst"
 }
 
-# --- puppeteer (PDF generation) ---
-
-Write-Host "Installing puppeteer..."
-Push-Location $AssetDir
-npm install puppeteer --save 2>&1 | Out-Null
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "OK puppeteer installed"
-} else {
-    Write-Host "WARNING: npm install puppeteer failed - PDF generation will be unavailable."
-    Write-Host "         To install manually: cd $AssetDir && npm install puppeteer"
-}
-Pop-Location
-
 Write-Host ""
 Write-Host "Installation complete."
 Write-Host "  Skills : $SkillDir"
@@ -71,6 +58,4 @@ Write-Host "  Assets : $AssetDir"
 Write-Host ""
 Write-Host "Usage: open Claude Code in any project directory and run any installed skill, e.g. /generate-sad"
 Write-Host "  New here? See PIPELINE.md in this repo, or run /sdlc-pipeline for a guided walkthrough."
-Write-Host "Requires: SPEAKMAN.AI MCP server configured in your Claude Code settings."
-Write-Host ""
-Write-Host "To use your own branding, add logo.png to: $AssetDir\templates\corporate\"
+Write-Host "Requires: SPEAKMAN.AI MCP server registered with Claude Code (claude mcp add)."

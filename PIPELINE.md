@@ -89,7 +89,7 @@ new brief, Update one against new information, or Validate one for rigor before 
 | Skill | `generate-sad` |
 | Workflow | `MCP_SOLUTION_ARCHITECTURE_V1` |
 | Consumes | A business description (text, file, URL, MCP resource) + optional capabilities context (existing systems inventory, Terraform files) |
-| Produces | `outputs/YYYY-MM-DD_{slug}/raw/` — `business_context_clarifier.txt`, `business_analyst.txt`, `business_application_architect.txt`, `technical_solution_architect.txt`, `compliance_officer.txt`, `visualization_specialist.txt` — plus a local SAD (Markdown/HTML/PDF) |
+| Produces | `outputs/YYYY-MM-DD_{slug}/raw/` — `business_context_clarifier.txt`, `business_analyst.txt`, `business_application_architect.txt`, `technical_solution_architect.txt`, `compliance_officer.txt`, `visualization_specialist.txt` — plus a local SAD (Markdown/HTML; print to PDF from the browser) |
 | Feeds | Phase 2 (business + tech context), Phase 4 (`technical_solution_architect.txt`, `compliance_officer.txt`), `generate-uat-tests` (`business_context_clarifier.txt`, `business_analyst.txt` for traceability) |
 
 ---

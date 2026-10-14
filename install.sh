@@ -31,9 +31,9 @@ for skill in "${SKILLS[@]}"; do
     echo "OK Skill installed -> $dst"
 done
 
-# --- Supporting assets (prompts, scripts, templates) ---
+# --- Supporting assets (synthesis prompts) ---
 
-ASSETS=("prompts" "scripts" "templates")
+ASSETS=("prompts")
 
 for asset in "${ASSETS[@]}"; do
     src="$REPO_DIR/$asset"
@@ -50,17 +50,6 @@ for asset in "${ASSETS[@]}"; do
     echo "OK Asset installed  -> $dst"
 done
 
-# --- puppeteer (PDF generation) ---
-
-echo "Installing puppeteer..."
-if cd "$ASSET_DIR" && npm install puppeteer --save > /dev/null 2>&1; then
-    echo "OK puppeteer installed"
-else
-    echo "WARNING: npm install puppeteer failed — PDF generation will be unavailable."
-    echo "         To install manually: cd $ASSET_DIR && npm install puppeteer"
-fi
-cd "$REPO_DIR"
-
 echo ""
 echo "Installation complete."
 echo "  Skills : $SKILL_DIR"
@@ -68,6 +57,4 @@ echo "  Assets : $ASSET_DIR"
 echo ""
 echo "Usage: open Claude Code in any project directory and run any installed skill, e.g. /generate-sad"
 echo "  New here? See PIPELINE.md in this repo, or run /sdlc-pipeline for a guided walkthrough."
-echo "Requires: SPEAKMAN.AI MCP server configured in your Claude Code settings."
-echo ""
-echo "To use your own branding, add logo.png to: $ASSET_DIR/templates/corporate/"
+echo "Requires: SPEAKMAN.AI MCP server registered with Claude Code (claude mcp add)."
