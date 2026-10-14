@@ -11,7 +11,7 @@ Follow every step below exactly. Do not generate the SAD content yourself — it
 
 **Prerequisites for this environment:**
 - The SPEAKMAN.AI MCP connector must be added under Settings → Connectors. If `start_session` / `get_outputs` / `submit_response` / `render_document` tools are not available, tell the user to add the connector before continuing.
-- HTML rendering (Step 6) happens via the `render_document` MCP tool, server-side — no local Python, Node, or bundled scripts/templates are needed for it. This skill's own folder still bundles `prompts/` (the SAD synthesis instructions); reference it with a path relative to this skill's folder, e.g. `prompts/sad_agent_prompt.md`.
+- HTML rendering (Step 6) is optional: run the bundled `scripts/render_html.py` if you can run Python, otherwise use the `render_document` MCP tool. This skill's own folder still bundles `prompts/` (the SAD synthesis instructions); reference it with a path relative to this skill's folder, e.g. `prompts/sad_agent_prompt.md`.
 - This sandbox is ephemeral — it does not persist after the conversation ends. Every deliverable (the `.md` and `.html`) must be surfaced to the user as a downloadable file before you finish, not just left on disk.
 
 ---
@@ -166,16 +166,27 @@ Key rules for this step:
 
 ---
 
-## Step 6 — Render HTML
+## Step 6 — Render HTML (only if asked for)
 
-Call the `render_document` MCP tool:
-- `markdown`: the full content of `{slug}.md` from Step 5
-- `title`: the document's title (from its first `#` heading)
-- `subtitle`: e.g. `"Solution Architecture Document · {today's date}"`
+HTML is optional, and only on request. The Markdown file from Step 5 is the deliverable. Do this step only if
+the user asked for an HTML version (or a PDF, which is printed from the HTML). Otherwise skip to Step 7 and
+offer the HTML in your report.
 
-The tool returns `{"html": "<full HTML document>"}`. Save that string to
-`outputs/YYYY-MM-DD_{slug}/{slug}.html`. The returned HTML is fully self-contained (inline CSS,
-embedded SPEAKMAN.AI logo) — no further build step is needed.
+**If you can run Python** (Claude Code and the Claude app can), render the HTML locally. The document
+never passes through you, which saves a lot of usage allowance on a large document:
+
+```
+python "scripts/render_html.py" "outputs/YYYY-MM-DD_{slug}/{slug}.md" "outputs/YYYY-MM-DD_{slug}/{slug}.html" --title "<the document's title>" --subtitle "Solution Architecture Document - {today's date}"
+```
+
+The script (the path is relative to this skill's folder) uses only the standard library, and its output is the same as the `render_document` tool's. Use `python3` if `python` is not found. Do not write your own renderer.
+
+**If you cannot run code**, call the `render_document` MCP tool with `markdown` (the full content of the
+Markdown file), `title` (the first `#` heading) and `subtitle` (`"Solution Architecture Document - {today's date}"`). It returns
+`{"html": "<full HTML document>"}`: save that string to `outputs/YYYY-MM-DD_{slug}/{slug}.html`.
+The HTML comes back as one tool result, about 1.3 times the size of the Markdown, and a large result may
+be cut off or refused by your client. If the Markdown is over about 40,000 characters, skip the HTML,
+deliver the Markdown file, and tell the user the HTML version was left out because the document is large.
 
 ### Step 6b — Custom Branding (optional)
 
@@ -199,7 +210,7 @@ Credits used : {session_cost}
 Compliance   : {score}/10 — {status}
 Outputs
   Markdown   : {slug}.md
-  HTML       : {slug}.html
+  HTML       : {slug}.html   (only if requested)
 ```
 
 Then say: "Review `{slug}.html` — this is your draft SAD, ready for architect review before ARB submission. Open it in a browser and use Print → Save as PDF if you need a PDF copy."

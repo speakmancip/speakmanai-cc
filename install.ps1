@@ -29,9 +29,9 @@ foreach ($Skill in $Skills) {
     Write-Host "OK Skill installed -> $Dst"
 }
 
-# --- Supporting assets (synthesis prompts) ---
+# --- Supporting assets (synthesis prompts, HTML renderer) ---
 
-$Assets = @("prompts")
+$Assets = @("prompts", "scripts")
 
 foreach ($Asset in $Assets) {
     $Src = Join-Path $PSScriptRoot $Asset

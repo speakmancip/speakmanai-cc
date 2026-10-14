@@ -31,9 +31,9 @@ for skill in "${SKILLS[@]}"; do
     echo "OK Skill installed -> $dst"
 done
 
-# --- Supporting assets (synthesis prompts) ---
+# --- Supporting assets (synthesis prompts, HTML renderer) ---
 
-ASSETS=("prompts")
+ASSETS=("prompts" "scripts")
 
 for asset in "${ASSETS[@]}"; do
     src="$REPO_DIR/$asset"

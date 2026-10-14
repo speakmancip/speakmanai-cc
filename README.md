@@ -40,8 +40,9 @@ a guided walkthrough that drives every phase for you.
 - [Claude Code](https://claude.ai/claude-code) installed
 - SPEAKMAN.AI MCP server registered with Claude Code. For the local server:
   `claude mcp add --transport http --scope user speakmanai http://localhost:8000/mcp`
-- Python 3.9+ for the `/pentest` skills. The document skills need neither Python nor Node:
-  the MCP server renders the HTML (`render_document`), and you print to PDF from the browser.
+- Python 3.9+ for the `/pentest` skills. The document skills need no Node. Their HTML is built by the
+  bundled `scripts/render_html.py` (standard library only, Python 3.8+), or by the MCP server's
+  `render_document` when a client cannot run code. You print to PDF from the browser.
 
 **For the `/pentest` gate only:** a running instance of
 [pentest-platform-companion](https://github.com/speakmancip/pentest-platform-companion) —
@@ -101,7 +102,7 @@ The skill will:
 3. **Run a SPEAKMAN.AI session** — polls until complete (~10 min)
 4. **Download agent outputs** — saves raw outputs to `outputs/YYYY-MM-DD_{slug}/raw/` in your project
 5. **Generate a local SAD** — authored from the agent outputs using the installed synthesis prompt
-6. **Render branded HTML** — through the MCP server's `render_document` tool. Open it in a browser and use Print → Save as PDF if you need a PDF
+6. **Render branded HTML** (only if you ask for it) — locally with `scripts/render_html.py`, or through the MCP server's `render_document` tool when the client cannot run code. A very large document skips the HTML and ships as Markdown. Open it in a browser and use Print → Save as PDF if you need a PDF
 
 The other skills follow the same pattern — see each skill's step-by-step instructions when you invoke them.
 
