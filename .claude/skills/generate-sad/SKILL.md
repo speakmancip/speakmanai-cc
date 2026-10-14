@@ -86,6 +86,8 @@ Call `start_session`:
 
 Poll every 30 seconds until `status = AWAITING_INPUT`.
 
+Do not call the poll tool again and again with the same arguments. Some clients block a third identical call as a loop. If the status has not changed, tell the user what you are waiting for and wait before you poll again. When the session is paused for a review or for your own answer, do what the pause asks instead of polling.
+
 ### 3b — Build and submit capabilities
 
 When AWAITING_INPUT arrives, the payload contains `input_required.prompt`, `input_required.schema`, and `input_required.context`.
@@ -211,11 +213,10 @@ Report the following to the user:
 
 ```
 Session ID   : {session_id}
-Credits used : {session_cost}
-Compliance   : {score}/10 — {status}
+Compliance   : {score}/10 - {status}
 Outputs
   Markdown   : outputs/{slug}/{slug}.md
   HTML       : outputs/{slug}/{slug}.html   (only if requested)
 ```
 
-Then say: "Review `{slug}.html` — this is your draft SAD, ready for architect review before ARB submission. Open it in a browser and use Print → Save as PDF if you need a PDF copy."
+Then say: "Review `{slug}.md` (and `{slug}.html` if you asked for it): this is your draft SAD, ready for architect review before ARB submission. I can also make an HTML version, which you can print to PDF, if you want one."

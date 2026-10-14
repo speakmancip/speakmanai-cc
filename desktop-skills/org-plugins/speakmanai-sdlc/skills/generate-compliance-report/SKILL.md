@@ -86,6 +86,8 @@ Call `start_session`:
 
 Poll every 30 seconds until `status = AWAITING_INPUT`.
 
+Do not call the poll tool again and again with the same arguments. Some clients block a third identical call as a loop. If the status has not changed, tell the user what you are waiting for and wait before you poll again. When the session is paused for a review or for your own answer, do what the pause asks instead of polling.
+
 ### 3b — Build and submit controls inventory
 
 When AWAITING_INPUT arrives, the payload contains `input_required.prompt`, `input_required.schema`, and `input_required.context`.
@@ -194,20 +196,20 @@ gave you a brand color. This is a plain text edit — no template files or scrip
 
 ## Step 7 — Deliver and Report
 
-Make sure `{slug}.md` and `{slug}.html` are both offered to the user as downloadable files from
-this conversation — this sandbox does not persist, so anything not downloaded now is lost.
+Make sure `{slug}.md` (and `{slug}.html`, if you made one) is offered to the user as a downloadable file from
+this conversation, because this sandbox does not persist and anything not downloaded now is lost.
+Tell the user where each file is.
 
 Report:
 
 ```
 Session ID        : {session_id}
-Credits used      : {session_cost}
 Framework(s)      : {frameworks}
-Overall risk      : {risk_level} — {score}/10
+Overall risk      : {risk_level} - {score}/10
 Critical gaps     : {critical_gap_count}
 Outputs
   Markdown        : {slug}.md
   HTML            : {slug}.html   (only if requested)
 ```
 
-Then say: "Review `{slug}.html` — this is your draft Compliance Assessment Report, ready for review before submission or remediation planning. Open it in a browser and use Print → Save as PDF if you need a PDF copy."
+Then say: "Review `{slug}.md` (and `{slug}.html` if you asked for it): this is your draft Compliance Assessment Report, ready for review before submission or remediation planning. I can also make an HTML version, which you can print to PDF, if you want one."
