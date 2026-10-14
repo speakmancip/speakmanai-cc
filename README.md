@@ -15,7 +15,7 @@ a guided walkthrough that drives every phase for you.
 | Phase | Skill | Command | Output |
 |---|---|---|---|
 | 0 — Idea Intake | Project Brief (Create / Update / Validate) | `/generate-project-brief` | `brief.md` — structured idea brief, ready to feed Phase 1 or a sizing/investment gate. Zero credits, no MCP session. |
-| 1 — Architecture | Solution Architecture Document | `/generate-sad` | SAD — HTML + PDF draft, ready for architect review before ARB submission |
+| 1 — Architecture | Solution Architecture Document | `/generate-sad` | SAD — Markdown + branded HTML draft, ready for architect review before ARB submission (print to PDF from the browser) |
 | 2 — Requirements | Requirements Engineer | `/generate-requirements` | Domain model, naming dictionary, use cases, API/DB schema, test strategy |
 | 2.5 — UX Design | UX & Interface Design | `/generate-ux-design` | Screen inventory, Mermaid user flows, proposed design direction, self-contained HTML mockups for human review. Optional. |
 | 3 — Code Generation | Code Generator (router + JS/Go/Python variants) | `/generate-speakmanai-code` | Working, milestone-gated, git-committed codebase |
@@ -38,9 +38,10 @@ a guided walkthrough that drives every phase for you.
 ## Prerequisites
 
 - [Claude Code](https://claude.ai/claude-code) installed
-- SPEAKMAN.AI MCP server configured in your Claude Code settings
-- Python 3.9+
-- Node.js (for PDF generation — puppeteer is installed automatically by the install script)
+- SPEAKMAN.AI MCP server registered with Claude Code. For the local server:
+  `claude mcp add --transport http --scope user speakmanai http://localhost:8000/mcp`
+- Python 3.9+ for the `/pentest` skills. The document skills need neither Python nor Node:
+  the MCP server renders the HTML (`render_document`), and you print to PDF from the browser.
 
 **For the `/pentest` gate only:** a running instance of
 [pentest-platform-companion](https://github.com/speakmancip/pentest-platform-companion) —
@@ -71,12 +72,15 @@ chmod +x install.sh && ./install.sh
 gets you all of them, no clone or install script needed. See
 [`desktop-skills/README.md`](desktop-skills/README.md).
 
+**Using the local Windows exe (v1.5.0 or later)?** It carries these skills. **Add to Claude Code**
+on its setup page registers the server and installs them, so you do not need this repo at all.
+
 The install script does two things:
 
 | What | Where |
 |---|---|
 | Skill files | `~/.claude/skills/` — available globally in every Claude Code session |
-| Supporting assets (scripts, prompts, templates) | `~/.claude/speakmanai-cc/` — referenced by the skills at runtime |
+| Synthesis prompts | `~/.claude/speakmanai-cc/prompts/` — read by the document skills at runtime |
 
 Once installed, you can run the skills from **any project directory** — no need to keep the cloned repo around.
 
@@ -97,7 +101,7 @@ The skill will:
 3. **Run a SPEAKMAN.AI session** — polls until complete (~10 min)
 4. **Download agent outputs** — saves raw outputs to `outputs/YYYY-MM-DD_{slug}/raw/` in your project
 5. **Generate a local SAD** — authored from the agent outputs using the installed synthesis prompt
-6. **Build HTML + PDF** — using your chosen template
+6. **Render branded HTML** — through the MCP server's `render_document` tool. Open it in a browser and use Print → Save as PDF if you need a PDF
 
 The other skills follow the same pattern — see each skill's step-by-step instructions when you invoke them.
 
@@ -118,22 +122,14 @@ outputs/
     │   ├── compliance_officer.txt
     │   └── visualization_specialist.txt
     ├── my-project.md        ← Markdown SAD
-    ├── my-project.html      ← Branded HTML
-    └── my-project.pdf       ← Print-ready PDF
+    └── my-project.html      ← Branded HTML, self-contained
 ```
 
 ---
 
-## Templates
+## Branding
 
-| Template | Use |
-|---|---|
-| `default` | SPEAKMAN.AI branded |
-| `corporate` | Your own brand |
-
-Templates are installed to `~/.claude/speakmanai-cc/templates/`.
-
-To use your corporate brand, add `logo.png` to `~/.claude/speakmanai-cc/templates/corporate/` and select `[corporate]` when prompted. See that directory's README for asset specs.
+The HTML is rendered server-side with SPEAKMAN.AI branding and is fully self-contained (inline CSS, embedded logo). To use your own brand, ask the skill to rebrand the document, or edit the saved HTML directly: swap the logo `<img>` in the header and adjust the header and accent colours in the `<style>` block. There is no template directory.
 
 ---
 
@@ -147,25 +143,6 @@ The synthesis prompts that drive local document generation are installed to `~/.
 | `compliance_agent_prompt.md` | `/generate-compliance-report` |
 
 Edit these to match your organisation's documentation standards — section names, required tables, compliance frameworks, or house style. They are intentionally separated from the skill files so teams can version-control their own prompts independently.
-
----
-
-## Running Scripts Directly
-
-The processing scripts are installed to `~/.claude/speakmanai-cc/scripts/`.
-
-**Pre-process Markdown** (strip heading numbers):
-```bash
-python ~/.claude/speakmanai-cc/scripts/preprocess.py outputs/2026-03-22_my-project/my-project.md
-```
-
-**Build HTML + PDF from existing Markdown:**
-```bash
-python ~/.claude/speakmanai-cc/scripts/doc_writer.py my-project_clean.md \
-  --template ~/.claude/speakmanai-cc/templates/default \
-  --output /absolute/path/to/outputs/2026-03-22_my-project/my-project \
-  --yes
-```
 
 ---
 
