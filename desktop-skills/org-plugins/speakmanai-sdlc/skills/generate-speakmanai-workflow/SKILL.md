@@ -126,7 +126,7 @@ Report the following to the user:
 
 ```
 Session ID     : {session_id}
-Credits used   : {session_cost}
+Credits used   : {session_cost}   (only if a tool reported a cost; leave this line out otherwise)
 Workflow ID    : {workflowId}
 Agents         : {agent_count} ({ai_count} AI, {mcp_count} MCP/HITL, {validator_count} validators)
 Output file    : outputs/{slug}/{workflowId}.json

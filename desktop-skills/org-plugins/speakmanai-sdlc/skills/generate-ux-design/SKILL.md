@@ -136,7 +136,7 @@ live only as JSON strings inside a bigger output.
 ```
 Phase 2.5 — UX & Interface Design
 Session ID   : {session_id}
-Credits used : {session_cost}
+Credits used : {session_cost}   (only if a tool reported a cost; leave this line out otherwise)
 Design review: {approved on first pass | approved after N revision(s)}
 Outputs      : outputs/YYYY-MM-DD_{slug}/
   raw/screen_inventory.json
