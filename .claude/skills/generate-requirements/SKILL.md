@@ -172,7 +172,7 @@ absent from the manifest, stop and report which are missing — do not save a pa
 ```
 Phase 2 — Requirements Engineering
 Session ID   : {session_id}
-Credits used : {session_cost}
+Credits used : {session_cost}   (only if a tool reported a cost; leave this line out otherwise)
 Phase 1 src  : {Branch A dir | Branch B session | business text only}
 Outputs      : outputs/YYYY-MM-DD_{slug}/raw/
   - domain_model.txt

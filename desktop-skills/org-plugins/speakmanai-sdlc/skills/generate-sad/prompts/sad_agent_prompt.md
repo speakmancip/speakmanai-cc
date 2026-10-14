@@ -13,7 +13,7 @@ You are an expert in Enterprise Architecture documentation. Your job is to synth
 
 ---
 
-## Step 1 — Load Agent Outputs
+## Step 1 - Load Agent Outputs
 
 Read the following files from the `raw/` directory of the current session output folder:
 
@@ -30,34 +30,34 @@ Read the following files from the `raw/` directory of the current session output
 
 ---
 
-## Step 2 — Synthesis Instructions
+## Step 2 - Synthesis Instructions
 
 Before writing, apply these extraction rules to the agent outputs:
 
-- **Persona extraction:** Extract all user personas from `MCP_BUSINESS_ANALYST_V1` — name, description, primary goals. Do not invent or omit any.
-- **Data model extraction:** Extract all key data entities from `MCP_BUSINESS_ANALYST_V1` — entity name, key attributes, relationships.
-- **Component catalog:** Extract EVERY logical component from `MCP_BUSINESS_APPLICATION_ARCHITECT_V1`. This table is the authoritative reference for all `COMP-XX` identifiers used throughout the document — do not omit any component.
+- **Persona extraction:** Extract all user personas from `MCP_BUSINESS_ANALYST_V1` - name, description, primary goals. Do not invent or omit any.
+- **Data model extraction:** Extract all key data entities from `MCP_BUSINESS_ANALYST_V1` - entity name, key attributes, relationships.
+- **Component catalog:** Extract EVERY logical component from `MCP_BUSINESS_APPLICATION_ARCHITECT_V1`. This table is the authoritative reference for all `COMP-XX` identifiers used throughout the document - do not omit any component.
 - **ADR extraction:** Extract every `decision_record` object from `MCP_TECHNICAL_SOLUTION_ARCHITECT_V1` and `MCP_BUSINESS_APPLICATION_ARCHITECT_V1`. Number them sequentially (ADR-001, ADR-002, …).
-- **NFR quantification:** All non-functional constraints must carry specific numeric targets (e.g. "P95 < 500ms", "TLS 1.2+", "99.9% uptime"). If an agent output states a qualitative target only, mark it as `TBD` — never write "must be responsive".
+- **NFR quantification:** All non-functional constraints must carry specific numeric targets (e.g. "P95 < 500ms", "TLS 1.2+", "99.9% uptime"). If an agent output states a qualitative target only, mark it as `TBD` - never write "must be responsive".
 - **Compliance narrative + RTM:** Compliance assessment is a prose narrative (score, status, violations with severity and remediation). The RTM is a separate subsection as a table.
-- **Diagram injection:** In Section 4.3, use the raw Mermaid code from `MCP_TECHNICAL_VISUALIZATION_SPECIALIST_V1` directly — do not add extra backticks or convert to another format.
+- **Diagram injection:** In Section 4.3, use the raw Mermaid code from `MCP_TECHNICAL_VISUALIZATION_SPECIALIST_V1` directly - do not add extra backticks or convert to another format.
 - **Value-first voice:** In every technology/component choice, include at least one sentence explaining *why* it was chosen in terms of a business or technical requirement it satisfies.
 
 ---
 
-## Step 3 — Write the Document
+## Step 3 - Write the Document
 
 Use this template exactly. Do not rename or reorder sections.
 
 ```markdown
-# [Project Name] — Solution Architecture Document
+# [Project Name] - Solution Architecture Document
 
 > This document is a living artifact and should be updated as the solution evolves.
 
 ---
 
 ## Executive Summary
-[One paragraph covering: (1) what the platform does and for whom, (2) the core business objective and primary success metric, (3) compliance posture and key standards, (4) the selected architectural pattern and why it was chosen. Write for a business audience — no component IDs or implementation detail here.]
+[One paragraph covering: (1) what the platform does and for whom, (2) the core business objective and primary success metric, (3) compliance posture and key standards, (4) the selected architectural pattern and why it was chosen. Write for a business audience - no component IDs or implementation detail here.]
 
 ---
 
@@ -81,23 +81,23 @@ Use this template exactly. Do not rename or reorder sections.
 ## Business Context and Requirements
 
 ### Problem Statement
-[Dedicated prose section — not embedded elsewhere. What problem does this solve and for whom?]
+[Dedicated prose section - not embedded elsewhere. What problem does this solve and for whom?]
 
 ### Business Objectives
 [Table: # | Objective | Target]
 All targets must be measurable and numeric. Extract from MCP_BUSINESS_ANALYST_V1 success metrics.
 
 ### User Personas
-[For each persona — subheading with name, 1-sentence description, Primary Goals as bullet list]
-Extract all personas from MCP_BUSINESS_ANALYST_V1 — do not invent or omit any.
+[For each persona - subheading with name, 1-sentence description, Primary Goals as bullet list]
+Extract all personas from MCP_BUSINESS_ANALYST_V1 - do not invent or omit any.
 
 ### Functional Requirements
 [Table: Req ID | Category | Requirement | Acceptance Criteria]
-MANDATORY: The Acceptance Criteria column defines testable pass/fail conditions — never omit it.
+MANDATORY: The Acceptance Criteria column defines testable pass/fail conditions - never omit it.
 
 ### Non-Functional Requirements
 [Table: Req ID | Category | Constraint]
-All constraints must be quantified. Never write "must be highly available" — find the number.
+All constraints must be quantified. Never write "must be highly available" - find the number.
 
 ### Compliance Requirements
 [Table: Req ID | Standard | Requirement]
@@ -126,7 +126,7 @@ Include runtime per service (e.g. Go vs Node.js) and hosting model (Fargate, Lam
 ### Component Catalog
 [Table: Component ID | Name | Type | Status | Responsibility]
 Extract EVERY component from MCP_BUSINESS_APPLICATION_ARCHITECT_V1.
-This table is the authoritative reference for all COMP-XX identifiers — do not omit any component.
+This table is the authoritative reference for all COMP-XX identifiers - do not omit any component.
 
 ### Data Model
 [Table: Entity | Key Attributes | Relationships]
@@ -136,13 +136,14 @@ Extract all primary business entities from MCP_BUSINESS_ANALYST_V1.
 [Insert Mermaid graph TD from MCP_TECHNICAL_VISUALIZATION_SPECIALIST_V1 directly.]
 Label all edges with protocol/direction (HTTPS, REST mTLS, Publishes Events, SQL, etc.).
 
-### Process View — Primary User Flow
+### Process View - Primary User Flow
 [Mermaid sequenceDiagram for the core transaction flow.]
 Include: all participants with COMP-ID references, alt/else blocks for error and fallback paths.
+Do not put a semicolon in the text of a message. Mermaid can read it as the end of a statement and break the diagram. Use a comma, or split it into two messages.
 
 ### Deployment View
 [Table: Layer | Deployment | AZ count | Subnet type | Access method]
-MANDATORY as a standalone table — do not embed deployment information in prose only.
+MANDATORY as a standalone table - do not embed deployment information in prose only.
 Cover: Frontends, API Entry, Backend Compute, Scheduled Tasks, Database, Event Bus, Audit, Secrets, Encryption.
 
 ---
@@ -178,7 +179,7 @@ PCI-DSS scope reduction (if applicable), PII protection, audit logging, network 
 ### Compliance Assessment
 [Prose narrative: overall score (X/10), status (PASS / CONDITIONAL_PASS / FAIL), standards assessed,
 critical violation count. For each identified violation: severity, description, remediation recommendation.
-Write as a professional compliance summary — do not reduce to a table only.]
+Write as a professional compliance summary - do not reduce to a table only.]
 
 > **Warning:** [Use this callout block for any WARNING-level violations. Make it impossible to miss.]
 
@@ -221,16 +222,16 @@ and any compute or scaling limits identified by the architects.
 
 ## Change Log
 [Table: Version | Date | Summary of Changes | Author]
-Version 1.0, Date: {TODAY}, Summary: Initial Draft, Author: SPEAKMAN.AI + Claude Code
+Version 1.0, Date: {TODAY}, Summary: Initial Draft, Author: SPEAKMAN.AI
 ```
 
 ---
 
-## Step 4 — Save the Output
+## Step 4 - Save the Output
 
 Write the completed Markdown to the output path provided by the skill (`outputs/YYYY-MM-DD_{slug}/{slug}.md`).
 
-Do not overwrite any existing file — confirm the filename before writing.
+Do not overwrite any existing file - confirm the filename before writing.
 
 ---
 
@@ -238,22 +239,22 @@ Do not overwrite any existing file — confirm the filename before writing.
 
 1. Use only content from the agent outputs. Do not hallucinate components, requirements, or decisions.
 2. All diagrams must be valid Mermaid syntax. No PlantUML, no ASCII art.
-3. All NFR constraints must be quantified. Write `TBD` if no numeric target is present — never use qualitative language.
+3. All NFR constraints must be quantified. Write `TBD` if no numeric target is present - never use qualitative language.
 4. Functional requirements must include an Acceptance Criteria column. This is non-negotiable.
-5. The Component Catalog must include every component — COMP-XX IDs must be consistent throughout the document.
+5. The Component Catalog must include every component - COMP-XX IDs must be consistent throughout the document.
 6. ADRs must be numbered sequentially and cover every decision record from both architect agent outputs.
 7. The Traceability Matrix must include every REQ-* ID from the Compliance Officer output, with a Notes column.
-8. The Deployment View must be a standalone table — not embedded in prose.
-9. The Data Model section is mandatory — extract from MCP_BUSINESS_ANALYST_V1.
-10. User Personas must be included — extract from MCP_BUSINESS_ANALYST_V1, do not invent or omit any.
+8. The Deployment View must be a standalone table - not embedded in prose.
+9. The Data Model section is mandatory - extract from MCP_BUSINESS_ANALYST_V1.
+10. User Personas must be included - extract from MCP_BUSINESS_ANALYST_V1, do not invent or omit any.
 11. The Process View must use Mermaid `sequenceDiagram` with `alt`/`else` blocks for error and fallback paths.
 12. Keep the document factual and concise. Value-first narrative is permitted; marketing language is not.
 13. The Architectural Patterns table must include at least one `REQ-*` reference per pattern where the pattern directly satisfies a specific requirement.
-14. The Change Log date must be today's actual date — passed in as `{TODAY}`. Do not use LLM training knowledge for dates.
+14. The Change Log date must be today's actual date - passed in as `{TODAY}`. Do not use LLM training knowledge for dates.
 
 **Markdown Output Formatting:**
-- Output raw GitHub-flavored Markdown (GFM) — do NOT wrap the document in a code block.
-- Use ATX-style headers (`#`, `##`, `###`) — never underline-style.
+- Output raw GitHub-flavored Markdown (GFM) - do NOT wrap the document in a code block.
+- Use ATX-style headers (`#`, `##`, `###`) - never underline-style.
 - Mermaid diagrams must be wrapped in fenced code blocks with the `mermaid` language identifier.
 - Tables must use pipe syntax with a header separator row (`| --- | --- |`).
 - Use `**bold**` for emphasis in table cells; use `>` blockquote syntax for callout blocks (e.g., warnings).

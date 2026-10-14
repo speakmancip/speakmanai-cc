@@ -3,20 +3,20 @@ name: generate-sad
 description: Run a SPEAKMAN.AI architecture workflow and author a Solution Architecture Document (SAD) from the agent outputs. Use when the user wants a SAD, architecture document, or solution architecture written for a project.
 ---
 
-# generate-sad — SPEAKMAN.AI SAD Generator (Claude Desktop / claude.ai)
+# generate-sad - SPEAKMAN.AI SAD Generator (Claude Desktop / claude.ai)
 
 You are running the SPEAKMAN.AI SAD Generator. You will orchestrate a full SPEAKMAN.AI MCP session and author a Solution Architecture Document (SAD) from the agent outputs, inside this conversation's execution environment.
 
-Follow every step below exactly. Do not generate the SAD content yourself — it is built in Step 5 from real agent outputs.
+Follow every step below exactly. Do not generate the SAD content yourself - it is built in Step 5 from real agent outputs.
 
 **Prerequisites for this environment:**
 - The SPEAKMAN.AI MCP connector must be added under Settings → Connectors. If `start_session` / `get_outputs` / `submit_response` / `render_document` tools are not available, tell the user to add the connector before continuing.
 - HTML rendering (Step 6) is optional: run the bundled `scripts/render_html.py` if you can run Python, otherwise use the `render_document` MCP tool. This skill's own folder still bundles `prompts/` (the SAD synthesis instructions); reference it with a path relative to this skill's folder, e.g. `prompts/sad_agent_prompt.md`.
-- This sandbox is ephemeral — it does not persist after the conversation ends. Every deliverable (the `.md` and `.html`) must be surfaced to the user as a downloadable file before you finish, not just left on disk.
+- This sandbox is ephemeral - it does not persist after the conversation ends. Every deliverable (the `.md` and `.html`) must be surfaced to the user as a downloadable file before you finish, not just left on disk.
 
 ---
 
-## Step 0 — Check for Existing Session
+## Step 0 - Check for Existing Session
 
 Before collecting any input, ask the user:
 
@@ -27,21 +27,21 @@ Before collecting any input, ask the user:
 
 ---
 
-## Step 1 — Collect Business Input
+## Step 1 - Collect Business Input
 
 Ask the user:
 
-> "What do you want to build? Describe it in a few sentences — or give me any of the following and I'll extract the description from it:
+> "What do you want to build? Describe it in a few sentences - or give me any of the following and I'll extract the description from it:
 > - Paste text directly
 > - Upload a file (.md, .pdf, .txt, .docx) into this conversation
 > - A URL or internal wiki link
 > - A connected MCP resource (Google Drive folder, Confluence space, SharePoint library)
 > - RAG search results or document links
-> - Terraform files (.tf or terraform.tfstate) — I'll extract your tech stack from these"
+> - Terraform files (.tf or terraform.tfstate) - I'll extract your tech stack from these"
 
 Read and parse whatever is provided. Extract:
 - Business goal and problem being solved
-- Target scale and success metrics (look for numbers — transactions/month, users, uptime targets)
+- Target scale and success metrics (look for numbers - transactions/month, users, uptime targets)
 - Key user types or stakeholders mentioned
 - Regulatory or compliance requirements (PCI-DSS, GDPR, HIPAA, ISO 27001, etc.)
 - Preferred or existing technology stack
@@ -50,13 +50,13 @@ Store this as **BUSINESS_CONTEXT**.
 
 ---
 
-## Step 2 — Collect Capabilities Source (Reference Only)
+## Step 2 - Collect Capabilities Source (Reference Only)
 
 Ask the user:
 
 > "Do you have any additional context for your current or planned technology capabilities? This helps build a richer architecture. You can provide:
 > - An existing systems inventory (any format)
-> - Terraform files (.tf / terraform.tfstate) — I'll map resources to capabilities
+> - Terraform files (.tf / terraform.tfstate) - I'll map resources to capabilities
 > - Architecture documents, RFPs, or technical briefs
 > - A connected doc store, Google Drive folder, or RAG search
 > - Or press Enter to use the business description only"
@@ -67,18 +67,20 @@ Parsing happens at Step 3b, once the live schema arrives from the workflow. Load
 
 ---
 
-## Step 3 — Run SPEAKMAN.AI Session
+## Step 3 - Run SPEAKMAN.AI Session
 
-### 3a — Start session
+### 3a - Start session
 
 Call `start_session`:
 - `workflow_id`: `MCP_SOLUTION_ARCHITECTURE_V1`
 - `title`: Short title derived from the business description (max 60 chars)
-- `description`: Business description from **BUSINESS_CONTEXT only** (max 8000 chars — keep goal, scale, personas, compliance, and key constraints). Do NOT include technology stack or capabilities detail — that belongs only in Step 3b.
+- `description`: Business description from **BUSINESS_CONTEXT only** (max 8000 chars - keep goal, scale, personas, compliance, and key constraints). Do NOT include technology stack or capabilities detail - that belongs only in Step 3b.
 
 Poll every 30 seconds until `status = AWAITING_INPUT`.
 
-### 3b — Build and submit capabilities
+Do not call the poll tool again and again with the same arguments. Some clients block a third identical call as a loop. If the status has not changed, tell the user what you are waiting for and wait before you poll again. When the session is paused for a review or for your own answer, do what the pause asks instead of polling.
+
+### 3b - Build and submit capabilities
 
 When AWAITING_INPUT arrives, the payload contains `input_required.prompt`, `input_required.schema`, and `input_required.context`.
 
@@ -93,7 +95,7 @@ If Terraform files are provided:
 - Use `terraform.tfstate` as ground truth for Current state; `.tf` files for Proposed
 - Infer migration_strategy from context (rename, replace, lift-and-shift)
 
-1. Read the schema from `input_required.schema` — this defines exactly what to build.
+1. Read the schema from `input_required.schema` - this defines exactly what to build.
 2. Display a summary table to the user showing what the schema expects:
 
 | Field | Description |
@@ -104,7 +106,7 @@ If Terraform files are provided:
 | deployments[].state | Current / Proposed / Legacy |
 | deployments[].migration_strategy | N/A, Replace, Replatform, etc. |
 
-3. Build the capabilities JSON array from FULL_CONTEXT, guided by the schema and `input_required.prompt`. Aim for 15–25 capabilities covering the full scope. Include both Business capabilities (functions, processes) and Technology capabilities (tools, platforms, APIs, infrastructure).
+3. Build the capabilities JSON array from FULL_CONTEXT, guided by the schema and `input_required.prompt`. Aim for 15-25 capabilities covering the full scope. Include both Business capabilities (functions, processes) and Technology capabilities (tools, platforms, APIs, infrastructure).
 
 4. Present a draft table to the user:
 
@@ -112,19 +114,19 @@ If Terraform files are provided:
 |---|---|---|---|---|
 | ... | ... | ... | ... | ... |
 
-Say: "Here are the capabilities I've extracted — confirm to submit, or describe any changes."
+Say: "Here are the capabilities I've extracted - confirm to submit, or describe any changes."
 
 5. On user confirmation, call `submit_response(session_id, <capabilities JSON array>)`.
 
-Poll every 60 seconds until `status = COMPLETED`. This takes 10–15 minutes.
+Poll every 60 seconds until `status = COMPLETED`. This takes 10-15 minutes.
 
 ---
 
-## Step 4 — Download Supporting Agent Outputs
+## Step 4 - Download Supporting Agent Outputs
 
 Call `get_outputs(session_id)` to get the manifest.
 
-Then call `get_output` for these agents **only** — fetch in parallel where possible:
+Then call `get_output` for these agents **only** - fetch in parallel where possible:
 
 | Agent ID | Contains |
 |---|---|
@@ -139,7 +141,7 @@ Then call `get_output` for these agents **only** — fetch in parallel where pos
 
 Create the working directory in this session's sandbox: `outputs/YYYY-MM-DD_{slug}/raw/` where slug is a lowercase-hyphenated version of the session title and YYYY-MM-DD is today's date.
 
-**Save each agent output using your file-write capability directly** — the `content` field returned by `get_output` is already in context. Write it straight to disk rather than shelling out to write it.
+**Save each agent output using your file-write capability directly** - the `content` field returned by `get_output` is already in context. Write it straight to disk rather than shelling out to write it.
 
 Use the stable filename mapping below (not the raw `agent_id`):
 
@@ -154,19 +156,19 @@ Use the stable filename mapping below (not the raw `agent_id`):
 
 ---
 
-## Step 5 — Generate SAD
+## Step 5 - Generate SAD
 
 Using the downloaded raw agent outputs saved in `outputs/YYYY-MM-DD_{slug}/raw/`, follow the instructions in this skill's `prompts/sad_agent_prompt.md` exactly to generate the SAD.
 
 Key rules for this step:
 - Read all 6 agent output files from the raw directory
 - Follow the synthesis and template instructions in `sad_agent_prompt.md`
-- **Change Log date**: use today's actual date — do NOT rely on LLM knowledge for this
+- **Change Log date**: use today's actual date - do NOT rely on LLM knowledge for this
 - Save the completed Markdown to: `outputs/YYYY-MM-DD_{slug}/{slug}.md`
 
 ---
 
-## Step 6 — Render HTML (only if asked for)
+## Step 6 - Render HTML (only if asked for)
 
 HTML is optional, and only on request. The Markdown file from Step 5 is the deliverable. Do this step only if
 the user asked for an HTML version (or a PDF, which is printed from the HTML). Otherwise skip to Step 7 and
@@ -188,29 +190,30 @@ The HTML comes back as one tool result, about 1.3 times the size of the Markdown
 be cut off or refused by your client. If the Markdown is over about 40,000 characters, skip the HTML,
 deliver the Markdown file, and tell the user the HTML version was left out because the document is large.
 
-### Step 6b — Custom Branding (optional)
+### Step 6b - Custom Branding (optional)
 
 If the user wants their own branding instead of the SPEAKMAN.AI default, edit the saved HTML
 directly: swap the `<img src="...">` in the `.doc-header` for their logo (a data URI, or an
 uploaded image reference), and adjust the header/accent colors in the `<style>` block if they
-gave you a brand color. This is a plain text edit — no template files or scripts involved.
+gave you a brand color. This is a plain text edit - no template files or scripts involved.
 
 ---
 
-## Step 7 — Deliver and Report
+## Step 7 - Deliver and Report
 
-Make sure `{slug}.md` and `{slug}.html` are both offered to the user as downloadable files from
-this conversation — this sandbox does not persist, so anything not downloaded now is lost.
+Make sure `{slug}.md` (and `{slug}.html`, if you made one) is offered to the user as a downloadable file from
+this conversation, because this sandbox does not persist and anything not downloaded now is lost.
+Tell the user where each file is.
 
 Report:
 
 ```
 Session ID   : {session_id}
-Credits used : {session_cost}
-Compliance   : {score}/10 — {status}
+Credits used : {session_cost}   (only if a tool reported a cost; leave this line out otherwise)
+Compliance   : {score}/10 - {status}
 Outputs
   Markdown   : {slug}.md
   HTML       : {slug}.html   (only if requested)
 ```
 
-Then say: "Review `{slug}.html` — this is your draft SAD, ready for architect review before ARB submission. Open it in a browser and use Print → Save as PDF if you need a PDF copy."
+Then say: "Review `{slug}.md` (and `{slug}.html` if you asked for it): this is your draft SAD, ready for architect review before ARB submission. I can also make an HTML version, which you can print to PDF, if you want one."
