@@ -63,7 +63,7 @@ Poll every 15–20 seconds (this session resolves as fast as you complete each s
    - **Planner pause**: build the `WORKFLOW_EVENT` JSON that sequences the Analyst then the Prompt Engineer (per the prompt's structure).
    - **Analyst pause**: act as the Workflow Architect — produce the full `{workflow, agents}` JSON, deciding `executionMode: "delegate"` vs background per agent per the delegation rule in the prompt, and include exactly one `AI_PLANNER` agent as the minimal `GENERIC_WORKFLOW_PLANNER` stub (see Step 4b) — no `systemPrompt` field on it at all.
    - **Prompt Engineer pause**: act as the Prompt Engineer — write every `systemPrompt`, tool-aware for delegate agents, pure-reasoning for background agents, leaving the `AI_PLANNER` (`GENERIC_WORKFLOW_PLANNER`) stub untouched — do not add a `systemPrompt` to it.
-5. Call `submit_response(session_id, <your result>)` with the result (stringified JSON where the step expects JSON).
+5. Call `submit_response(session_id, <your result>)` with the result (stringified JSON where the step expects JSON). Also pass `executed_by`: the name of your tool and your model, for example `Claude Code, claude-opus-5-5` (say what you actually are and do not guess; it is recorded with the output).
 
 Continue until `status = COMPLETED`.
 

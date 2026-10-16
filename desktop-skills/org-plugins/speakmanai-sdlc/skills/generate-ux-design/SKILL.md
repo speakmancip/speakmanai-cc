@@ -96,7 +96,7 @@ This workflow has one delegate step and one human review gate, in sequence:
   validated screen inventory + flow diagrams). Do the actual design work yourself: propose a
   direction (or fetch the real brand source if one was referenced) and produce self-contained
   HTML mockups for the 3-5 highest-priority screens, per the prompt's own instructions. Submit
-  the exact JSON shape it asks for via `submit_response`.
+  the exact JSON shape it asks for via `submit_response`. On every `submit_response` in this skill, also pass `executed_by`: the name of your tool and your model, for example `Claude Code, claude-opus-5-5` (say what you actually are and do not guess; it is recorded with the output).
 
 - **`agent_type: "HITL_VALIDATOR"` (origin `UX_MOCKUP_DESIGNER_V1`)** — this is the real human
   review gate. **Do not self-approve.** Save each mockup from the prior step's own submission to

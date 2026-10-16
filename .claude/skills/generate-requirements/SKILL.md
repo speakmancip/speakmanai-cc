@@ -116,7 +116,7 @@ gates; handle each `AWAITING_INPUT` as it arrives, then keep polling until `COMP
 ### 3b — Handle each AWAITING_INPUT gate
 
 On every `AWAITING_INPUT`, read `input_required.agent_id`, `prompt`, `schema`, and `context`,
-then respond via `submit_response(session_id, response)`:
+then respond via `submit_response(session_id, response)` (also pass `executed_by`: the name of your tool and your model, for example `Claude Code, claude-opus-5-5` (say what you actually are and do not guess; it is recorded with the output)):
 
 - **`RE_TECH_STACK_PROVIDER_V1`** — submit TECH_STACK from Step 2, formatted to the gate's
   `schema`. Name concrete technologies (e.g. payment SDK, database engine, auth provider,
