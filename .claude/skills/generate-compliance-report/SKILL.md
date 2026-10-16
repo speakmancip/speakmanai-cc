@@ -100,6 +100,8 @@ Do not call the poll tool again and again with the same arguments. Some clients 
 
 When AWAITING_INPUT arrives, the payload contains `input_required.prompt`, `input_required.schema`, and `input_required.context`.
 
+On every `submit_response` you make in this workflow, also pass `executed_by`: the name of your tool and your model, for example `Claude Code, claude-opus-5-5`. Say what you actually are and do not guess a model name you cannot see. The engine records it with the output, so the run record shows who did the work.
+
 If **CONTROLS_SOURCE** was provided in Step 2, read and parse it now against the live schema.
 
 1. Read the schema from `input_required.schema` - this defines exactly what to build.

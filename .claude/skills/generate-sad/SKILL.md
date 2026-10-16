@@ -92,6 +92,8 @@ Do not call the poll tool again and again with the same arguments. Some clients 
 
 When AWAITING_INPUT arrives, the payload contains `input_required.prompt`, `input_required.schema`, and `input_required.context`.
 
+On every `submit_response` you make in this workflow, also pass `executed_by`: the name of your tool and your model, for example `Claude Code, claude-opus-5-5`. Say what you actually are and do not guess a model name you cannot see. The engine records it with the output, so the run record shows who did the work.
+
 Now read and parse `CAPABILITIES_SOURCE` (from Step 2). Extract:
 - Current/existing technology systems and their deployment states (Current)
 - Planned or proposed tools (Proposed)

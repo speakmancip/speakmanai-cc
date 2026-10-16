@@ -72,7 +72,7 @@ When AWAITING_INPUT arrives:
 
 3. Say: "Here is the proposed agent structure — confirm to proceed to prompt generation, or describe any changes."
 
-4. On confirmation (or with changes incorporated): call `submit_response(session_id, <reviewed or original JSON>)`.
+4. On confirmation (or with changes incorporated): call `submit_response(session_id, <reviewed or original JSON>)`. Also pass `executed_by`: the name of your tool and your model, for example `Claude Code, claude-opus-5-5` (say what you actually are and do not guess; it is recorded with the output).
 
 Poll every 60 seconds until `status = COMPLETED`. Prompt generation takes 5–10 minutes.
 
