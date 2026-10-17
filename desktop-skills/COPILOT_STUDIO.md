@@ -22,15 +22,51 @@ Copilot Studio is a cloud service — it cannot reach `http://127.0.0.1:8000`, w
 SPEAKMAN.AI server (`SpeakmanAI.exe` / `launcher.py`) actually listens. Two extra steps beyond
 what Claude Desktop needs (Desktop can talk to `localhost` directly):
 
-1. **Tunnel the local port to a public URL.** Confirmed working via VS Code's built-in port
-   forwarding (Ports panel → Forward a Port → `8000`) — this gives an external `https://` URL
-   that proxies to the local server. Use that forwarded URL, not `localhost`, when adding the
-   MCP connector in Copilot Studio.
-2. **Load `/setup` through the tunnel URL once before connecting.** The local server's onboarding
-   page (`GET /setup`) needs to actually be visited via the forwarded URL — the connector didn't
-   connect successfully in Copilot Studio until this was done first. Likely VS Code's tunnel
-   showing its own one-time "continue to this site" interstitial on first visit, but confirm this
-   step every time a new tunnel URL is generated (forwarded URLs aren't stable across restarts).
+**From SPEAKMAN.AI Lite v1.5.0 the server refuses requests that arrive through a tunnel unless
+Remote access is switched on and the request carries the access token.** Without that, the
+tunnel gets `Remote access is off`. The setup page and the local API are never served through a
+tunnel, only `/mcp` is. Tested 2026-10-17 on the Windows `SpeakmanAI.exe` with a public Microsoft
+Dev Tunnel, with a Copilot Studio agent running a search and reading a session's outputs.
+
+1. **Turn on Remote access.** On the computer that runs SpeakmanAI, open the setup page
+   (`http://localhost:8000/setup`), find the Remote access section, turn it on and copy the
+   token. A new token can be generated there at any time; the old one then stops working.
+2. **Tunnel the local port to a public URL.** Forward port `8000` and make the tunnel public
+   (tested with a Microsoft Dev Tunnel set to public access, which gives a URL like
+   `https://<id>-8000.use.devtunnels.ms`). The MCP address is that URL followed by `/mcp`. Use it,
+   not `localhost`, in Copilot Studio. The URL changes when the tunnel is recreated, so update the
+   connector then. VS Code's Ports panel gives the same kind of URL; it has not been re-tested
+   with the token.
+3. **Add the MCP server in Copilot Studio.** Choose **API key** as the authentication, enter the
+   header name `x-api-key`, and paste the token as the value. The server also accepts
+   `Authorization: Bearer <token>`, but `x-api-key` is what was tested.
+4. **Create the connection.** At the connection step create a new connection with a name and
+   enter the key again. The tool list should load straight away.
+5. **Check it works.** Ask the agent to find a session by a word in its title. It should list
+   matching sessions and, if asked, the outputs of one.
+
+Things that go wrong:
+
+- **`Couldn't load MCP tools` with HTTP 401.** The request reached SpeakmanAI without the right
+  token. Copilot Studio creates a new sub connection each time the MCP test is edited, and each one
+  appears in the connection drop-down of the MCP edit tool. A stale one keeps its old key. Pick the
+  connection that holds the current key, or create a new one and enter the key again. A key
+  mistyped on the first try looked like this too.
+- **`Remote access is off`.** Turn it on in the setup page (step 1).
+- **`A valid access token is required`.** The token is missing or does not match the current one.
+- **The test panel replies `Not Acceptable: Client must accept text/event-stream`.** Harmless. The
+  panel's plain JSON test does not ask for that response type. It also shows the request got past
+  the token check. The agent's real calls work.
+- **A browser-based test page fails with `Failed to fetch`.** A browser sends a preflight request
+  with no token first, and the server answers it 401 without cross-origin headers. This is not a
+  Copilot Studio problem. Test from Copilot Studio itself or with `curl`.
+- **Checking what arrived.** Refused remote requests are logged to
+  `%USERPROFILE%\.speakmanai\speakmanai.log` with which headers were present, never their
+  values. This needs a build from 2026-10-17 or later (`dist\v1.5.0-guard2` or newer).
+
+The token is the only thing protecting the endpoint, so treat it like a password. Generate a new
+one on the setup page after sharing it in a screenshot, chat or ticket, and turn Remote access off
+when you are not using the tunnel.
 
 ## Two upload paths — pick based on skill complexity
 
