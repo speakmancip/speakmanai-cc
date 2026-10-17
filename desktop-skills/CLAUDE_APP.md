@@ -9,7 +9,7 @@ For people running `SpeakmanAI.exe` on their own computer. It covers three ways 
 | You want to use | Do this | Needs |
 |---|---|---|
 | Claude Code in a terminal, or the Code tab of the Claude app | [Claude Code CLI](#route-1-claude-code-cli-recommended) | Nothing beyond the installer. No admin, no Node |
-| The chat side of the Claude app | [The config file](#route-2-the-chat-side-of-the-claude-app) | Node installed for your user, and a hand-edited file |
+| The chat side of the Claude app | [The extension](#route-2-the-chat-side-of-the-claude-app) (or the config file below it) | The extension: one file, no Node, no admin. The config file: Node installed for your user and a hand-edited file |
 | Cowork | Same steps as the chat side below | Cowork needs one admin approval to install |
 
 ## Route 1: Claude Code CLI (recommended)
@@ -26,6 +26,23 @@ If the installer puts `claude` somewhere that is not on your PATH, the setup pag
 ## Route 2: the chat side of the Claude app
 
 The app's own "Add custom connector" screen cannot take the exe's address. That screen is called from Anthropic's servers, which cannot reach `http://127.0.0.1`, and it asks for an https address. The way in is the app's config file, with a small bridge program in between. The exe speaks HTTP, and the config file launches programs, so the bridge turns one into the other.
+
+### Easiest: the extension
+
+`claude-app-extension/speakmanai-local.mcpb` in this repo is a small Claude Desktop extension that does the same job as the config entry below, using the Node that ships inside the Claude app. You install no Node and edit no file. It is unsigned, so the app shows a red warning (see below).
+
+1. Start `SpeakmanAI.exe`.
+2. In the Claude app open **Settings, Extensions, Advanced settings, Install Extension** and pick `speakmanai-local.mcpb`. Double-clicking the file does not work on Windows: it has no program associated with it.
+3. Read the red warning ("Installing will grant this extension access to everything on your computer. Any developer information shown has not been verified by Anthropic"). It is the standard warning for any extension that did not come from Anthropic's directory. The source is `claude-app-extension/server/index.js`, about 90 lines. It only talks to `http://127.0.0.1:<port>/mcp`. Press **Install**.
+4. Leave the port at 8000 unless the setup page shows another. The Save button stays grey until you edit the field: change the number and change it back.
+5. The extension installs switched off. Turn on its toggle.
+6. Start a new chat and ask it to list the SPEAKMAN.AI workflows. Chat and Cowork are one interface now, so this covers both.
+
+If `SpeakmanAI.exe` is not running, the chat says "SPEAKMAN.AI is not running on port 8000. Start SpeakmanAI.exe, check the port on its setup page, then try again." Start the exe and ask again.
+
+Tested 2026-10-16 on a standard account: no admin prompt; listing workflows and skills, searching by details and `get_outputs` all worked.
+
+### The config file route
 
 1. **Install Node for your user.** The bridge is started through `npx`, which comes with Node. A system-wide install needs admin. A per-user install does not (a zip build from nodejs.org unpacked into your profile with its folder added to your user PATH, or `nvm-windows`). In a new PowerShell window, `node --version` and `npx --version` should both answer.
 2. **Open the config file.** In the Claude app open the Developer tab and press **Edit config**, or open `%AppData%\Claude\claude_desktop_config.json` yourself. Create it if it is missing.
