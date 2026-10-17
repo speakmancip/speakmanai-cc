@@ -10,7 +10,7 @@ For people running `SpeakmanAI.exe` on their own computer. It covers three ways 
 |---|---|---|
 | Claude Code in a terminal, or the Code tab of the Claude app | [Claude Code CLI](#route-1-claude-code-cli-recommended) | Nothing beyond the installer. No admin, no Node |
 | The chat side of the Claude app | [The config file](#route-2-the-chat-side-of-the-claude-app) | Node installed for your user, and a hand-edited file |
-| Cowork | Not covered | The app's Cowork feature needs admin rights to install |
+| Cowork | Same steps as the chat side below | Cowork needs one admin approval to install |
 
 ## Route 1: Claude Code CLI (recommended)
 
@@ -44,7 +44,11 @@ The app's own "Add custom connector" screen cannot take the exe's address. That 
 4. **Fully quit and reopen the Claude app**, including the tray icon.
 5. **Try it.** Start a new chat and ask for something the skills cover, for example "I need an architecture document for a small app". Or ask it to list the SPEAKMAN.AI workflows.
 
-You do not need to upload the skills plugin. In the test the app fetched the skill from the server by itself.
+You do not need to upload the skills plugin. In the test the app fetched the skill from the server by itself. If you want the skills installed in the app anyway, download `speakmanai-sdlc.zip` from the Claude app (chat) tab of the setup page and drop it into the plugin upload area in the app's settings. It loaded, and the chat could see it.
+
+Cowork uses the same file and the same entry. Install Cowork (it asks for admin once), open the Developer tab, and configure the server there as above. Without the entry Cowork sees no SPEAKMAN.AI tools from your computer.
+
+**Two servers at once:** if your Claude account also has a hosted SPEAKMAN.AI connector, the app has two sets of tools with the same names. Name which one you mean in your request, or remove the one you are not using, so a request does not go to the wrong server.
 
 ### If it does not connect
 
@@ -65,10 +69,10 @@ Delete the `speakmanai` entry from `claude_desktop_config.json` and restart the 
 - Installing the Claude Code CLI, then pressing Check again and Connect on the setup page, made the app's built-in Claude Code find the server after an app restart, with no config file and no Node. The CLI had never been opened or signed in to.
 - With the config entry in place and no skills uploaded, both the chat side and the app's Claude Code started a SPEAKMAN.AI session on a plain request and fetched the skill from the server.
 - The app's custom connector screen expects an https address and could not take the local one.
+- Cowork, installed on the same standard account after one admin approval, behaved the same as the chat side: same config file through its Developer tab, no trouble reaching the local server, and the plugin zip uploaded and was visible in chat. With no config entry it could not see the local server, but it did reach another SPEAKMAN.AI connector already on the account.
 
 ## Not tested
 
-- Whether the skills plugin upload (`speakmanai-sdlc.zip`) makes skill triggering more reliable than the connector alone.
+- Whether the skills plugin (`speakmanai-sdlc.zip`) makes skill triggering more reliable, or changes what the run record shows, compared with the connector alone. It uploads and shows in chat; that is all that was checked.
 - A full run to the end from the chat side, and what the run record shows for it.
-- Cowork, which needs admin to install.
 - Windows setups with Node already installed system-wide, and macOS.
