@@ -1,0 +1,40 @@
+{
+  "manifest_version": "0.3",
+  "name": "speakmanai-local",
+  "display_name": "SPEAKMAN.AI (this computer)",
+  "version": "0.1.0",
+  "description": "Connects the Claude app to SPEAKMAN.AI running on this computer.",
+  "long_description": "A small bridge between the Claude app and the SPEAKMAN.AI program on your computer (SpeakmanAI.exe). It adds no tools of its own: it passes each request to the local server and returns the answer. Start SpeakmanAI.exe first. If the setup page shows a port other than 8000, set it under this extension's settings.",
+  "author": {
+    "name": "SPEAKMAN.AI"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"],
+      "env": {
+        "SPEAKMANAI_PORT": "${user_config.port}"
+      }
+    }
+  },
+  "user_config": {
+    "port": {
+      "type": "number",
+      "title": "SpeakmanAI port",
+      "description": "The port shown on the SpeakmanAI setup page. It is 8000 unless you changed it.",
+      "default": 8000,
+      "required": true,
+      "min": 1,
+      "max": 65535
+    }
+  },
+  "tools_generated": true,
+  "compatibility": {
+    "platforms": ["darwin", "win32"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}
