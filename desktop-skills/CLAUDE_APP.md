@@ -41,7 +41,7 @@ The app's own "Add custom connector" screen cannot take the exe's address. That 
 
 If `SpeakmanAI.exe` is not running, the chat says "SPEAKMAN.AI is not running on port 8000. Start SpeakmanAI.exe, check the port on its setup page, then try again." Start the exe and ask again.
 
-The app's Code tab uses the extension too, so with the extension installed you do not need the Claude Code CLI for the app. You still need the CLI to use Claude Code in a terminal.
+The app's Code tab uses the extension too, so with the extension installed you do not need the Claude Code CLI for the app. You still need the CLI to use Claude Code in a terminal. Slash commands such as `/generate-sad` appear in the app only after you install the skills plugin (`speakmanai-sdlc.zip`); the CLI route installs them for you. Without the plugin the assistant still fetches the skills from the server when you ask for a deliverable.
 
 Tested 2026-10-16 on a standard account: no admin prompt; listing workflows and skills, searching by details and `get_outputs` all worked.
 
