@@ -8,7 +8,8 @@ For people running `SpeakmanAI.exe` on their own computer. It covers three ways 
 
 | You want to use | Do this | Needs |
 |---|---|---|
-| Claude Code in a terminal, or the Code tab of the Claude app | [Claude Code CLI](#route-1-claude-code-cli-recommended) | Nothing beyond the installer. No admin, no Node |
+| Claude Code in a terminal | [Claude Code CLI](#route-1-claude-code-cli-recommended) | Nothing beyond the installer. No admin, no Node |
+| The Code tab of the Claude app | [The extension](#route-2-the-chat-side-of-the-claude-app), or the CLI route | The extension: nothing else. The CLI also works for the Code tab |
 | The chat side of the Claude app | [The extension](#route-2-the-chat-side-of-the-claude-app) (or the config file below it) | The extension: one file, no Node, no admin. The config file: Node installed for your user and a hand-edited file |
 | Cowork | Same steps as the chat side below | Cowork needs one admin approval to install |
 
@@ -39,6 +40,8 @@ The app's own "Add custom connector" screen cannot take the exe's address. That 
 6. Start a new chat and ask it to list the SPEAKMAN.AI workflows. Chat and Cowork are one interface now, so this covers both.
 
 If `SpeakmanAI.exe` is not running, the chat says "SPEAKMAN.AI is not running on port 8000. Start SpeakmanAI.exe, check the port on its setup page, then try again." Start the exe and ask again.
+
+The app's Code tab uses the extension too, so with the extension installed you do not need the Claude Code CLI for the app. You still need the CLI to use Claude Code in a terminal.
 
 Tested 2026-10-16 on a standard account: no admin prompt; listing workflows and skills, searching by details and `get_outputs` all worked.
 
